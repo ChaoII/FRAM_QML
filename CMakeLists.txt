@@ -9,7 +9,7 @@ set(HuskarUI_DIR "D:/HuskarUI")
 set(CMAKE_AUTORCC ON)
 
 set(OpenCV_DIR "E:/CLionProjects/ModelDeploy/build/_deps/opencv-src/x64/vc17/staticlib")
-
+set(ModelDeploy_DIR "E:/CLionProjects/ModelDeploy/build/install")
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia)
 find_package(OpenCV)
@@ -18,26 +18,23 @@ qt_standard_project_setup()
 
 qt_add_executable(appfram_qml
         src/main.cpp
-        src/FaceDetector.cpp
-        src/FaceDetector.h
         src/providers/CameraImageProvider.cpp
         src/providers/CameraImageProvider.h
         src/workers/FaceDetectionWorker.cpp
         src/workers/FaceDetectionWorker.h
-        src/FaceDetector.cpp
-        src/FaceDetector.h
         src/providers/FaceDetectionResultProvider.cpp
         src/providers/FaceDetectionResultProvider.h
         src/workers/CameraDecodeWorker.cpp
         src/workers/CameraDecodeWorker.h
         src/workers/WorkerBase.cpp
         src/workers/WorkerBase.h
-        src/CameraDecoder.cpp
-        src/CameraDecoder.h
         src/CameraManager.cpp
         src/CameraManager.h
         src/LocalCamera.cpp
         src/LocalCamera.h
+        src/ThreadSafeQueue.h
+        src/VideoProcessor.cpp
+        src/VideoProcessor.h
 )
 
 qt_add_qml_module(appfram_qml
@@ -61,8 +58,15 @@ set_target_properties(appfram_qml PROPERTIES
         WIN32_EXECUTABLE TRUE
 )
 
-target_include_directories(appfram_qml PRIVATE ${HuskarUI_DIR}/HuskarUI/include)
-target_link_directories(appfram_qml PRIVATE ${HuskarUI_DIR}/HuskarUI/lib)
+target_include_directories(appfram_qml PRIVATE
+        ${HuskarUI_DIR}/HuskarUI/include
+        ${ModelDeploy_DIR}/include
+)
+
+target_link_directories(appfram_qml PRIVATE
+        ${HuskarUI_DIR}/HuskarUI/lib
+        ${ModelDeploy_DIR}/lib
+)
 
 
 target_link_libraries(appfram_qml
@@ -71,6 +75,7 @@ target_link_libraries(appfram_qml
         Qt6::Multimedia
         HuskarUIBasic
         ${OpenCV_LIBS}
+        ModelDeploySDK
 )
 
 include(GNUInstallDirs)

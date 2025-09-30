@@ -12,12 +12,14 @@ int main(int argc, char* argv[]) {
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
     QQuickWindow::setDefaultAlphaBuffer(true);
 
+    qRegisterMetaType<DetectionResults>("DetectionResults");
+
     QQmlApplicationEngine engine;
     CameraManager manager(&engine);
     LocalCamera localCamera;
     engine.rootContext()->setContextProperty("cameraManager", &manager);
     engine.rootContext()->setContextProperty("localCamera", &localCamera);
-    qmlRegisterUncreatableType<CameraDecoder>("MyApp", 1, 0, "CameraDecoder", "Enum only");
+    qmlRegisterUncreatableType<VideoProcessor>("MyApp", 1, 0, "VideoProcessor", "Enum only");
 
 
     const QUrl url(QStringLiteral("qrc:/fram_qml/qml/Main.qml"));

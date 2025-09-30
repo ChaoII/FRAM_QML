@@ -4,36 +4,59 @@
 
 #include "FaceDetectionWorker.h"
 #include <QRandomGenerator>
+#include <QTimer>
 
 
-void FaceDetectionWorker::startFaceDetection() {
-    is_running_ = true;
-    while (is_running_) {
-        QThread::msleep(33); // 30 FPS
-        QImage img(":/images/image_0004.jpg"); // 示例图片
-        if (!img.isNull()) {
-            QImage out = faceDetection(img);
-            emit detectionFinished(out);
-        }
-    }
+FaceDetectionWorker::FaceDetectionWorker(QObject* parent)
+    : WorkerBase(parent) {
+    face_model_ = std::make_unique<modeldeploy::vision::face::Scrfd>(
+        "E:/CLionProjects/ModelDeploy/test_data/test_models/face/scrfd_2.5g_bnkps_shape640x640.onnx");
 }
 
+void FaceDetectionWorker::startFaceDetection() {
+    if (is_running_.exchange(true)) return;
+    QTimer::singleShot(0, this, &FaceDetectionWorker::process);
+}
 
-QImage FaceDetectionWorker::faceDetection(const QImage& image) {
-    QImage result = image.copy();
-    QPainter painter(&result);
-    painter.setRenderHint(QPainter::Antialiasing);
-    is_running_ = false;
-    int faceCount = QRandomGenerator::global()->bounded(1, 4);
-    for (int i = 0; i < faceCount; ++i) {
-        int x = QRandomGenerator::global()->bounded(0, image.width() - 100);
-        int y = QRandomGenerator::global()->bounded(0, image.height() - 100);
-        int w = QRandomGenerator::global()->bounded(80, 150);
-        int h = QRandomGenerator::global()->bounded(80, 150);
-        painter.setPen(QPen(Qt::red, 3));
-        painter.drawRect(x, y, w, h);
-        painter.setPen(Qt::white);
-        painter.drawText(x, y - 5, QString("Face %1").arg(i + 1));
+QVariantList FaceDetectionWorker::convertToVariantList(
+    const std::vector<modeldeploy::vision::DetectionLandmarkResult>& dets) {
+    QVariantList list;
+    for (const auto& r : dets) {
+        if (r.score < 0.5f) continue;
+        QVariantMap map;
+        map["x"] = r.box.x;
+        map["y"] = r.box.y;
+        map["width"] = r.box.width;
+        map["height"] = r.box.height;
+        map["score"] = r.score;
+        map["label_id"] = r.label_id;
+        list.append(map);
     }
-    return result;
+    return list;
+}
+
+void FaceDetectionWorker::process() {
+    if (!is_running_) return;
+    cv::Mat frame;
+    if (frame_queue_ && frame_queue_->try_pop(frame)) {
+        try {
+            // 预处理
+            std::vector<modeldeploy::vision::DetectionLandmarkResult> result;
+            auto frame_ = frame.clone();
+            if (!face_model_->predict(modeldeploy::ImageData::from_mat(&frame_), &result)) {
+                qDebug() << "inference Error";
+                emit inferenceError("inference Error");
+            }
+            auto results = convertToVariantList(result);
+            emit detectionFinished(results);
+        }
+        catch (const std::exception& e) {
+            emit inferenceError(QString::fromStdString(e.what()));
+        }
+    }
+
+    // 继续处理
+    if (is_running_) {
+        QTimer::singleShot(1, this, &FaceDetectionWorker::process);
+    }
 }

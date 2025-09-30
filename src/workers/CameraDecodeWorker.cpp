@@ -2,6 +2,7 @@
 // Created by aichao on 2025/9/28.
 //
 
+#include <QTimer>
 #include "CameraDecodeWorker.h"
 
 
@@ -25,19 +26,47 @@ void CameraDecodeWorker::InitMediaDevice(const QString& fileName) {
 }
 
 
+void CameraDecodeWorker::setFrameQueue(ThreadSafeQueue<cv::Mat>* queue) {
+    frame_queue_ = queue;
+}
+
+
 void CameraDecodeWorker::startCameraDecode() {
-    is_running_ = true;
+    if (is_running_.exchange(true)) return;
+    if (!cap_->isOpened()) {
+        emit captureError("Failed to open video source");
+        is_running_ = false;
+        return;
+    }
+    // 启动处理循环
+    QTimer::singleShot(0, this, &CameraDecodeWorker::process);
+}
+
+
+void CameraDecodeWorker::process() {
+    if (!is_running_) return;
+    // qDebug() << "process" << is_running_;
     cv::Mat frame;
-    while (is_running_) {
-        cap_->read(frame);
-        if (frame.empty()) continue;
+    if (!cap_->read(frame)) {
+        emit captureError("Failed to read frame");
+        is_running_ = false;
+        return;
+    }
 
-        QImage image = matToQImage(frame);
-        emit decodeFinished(image);
-
-        QThread::msleep(30); // 控制帧率
+    if (!frame.empty()) {
+        // 发送信号给QML显示
+        emit decodeFinished(matToQImage(frame));
+        // 如果有推理队列，也推送到推理线程
+        if (frame_queue_) {
+            frame_queue_->push(std::move(frame));
+        }
+    }
+    // 继续下一帧
+    if (is_running_) {
+        QTimer::singleShot(1, this, &CameraDecodeWorker::process);
     }
 }
+
 
 QImage CameraDecodeWorker::matToQImage(const cv::Mat& mat) {
     if (mat.empty()) return {};

@@ -6,6 +6,10 @@ import MyApp 1.0
 HusWindow {
     id: window
     property var detectionResults: []
+    property int currentFrameSequence: 0
+    property var frameTimestamps: ({})  // 存储帧时间戳的字典
+    property int lastDetectionSequence: -1  // 上次显示的检测结果序列号
+    
     captionBar.visible: false
     width: 640
     height: 480
@@ -90,13 +94,19 @@ HusWindow {
         function onCameraFrameUpdated(camera_id) {
             // 强制刷新，避免 Image 缓存
             processedImage.updateImage(camera_id);
+            // 增加帧序列号
+            currentFrameSequence++;
         }
-        function onFaceResultUpdate(camera_id, results) {
+        
+        function onFaceResultUpdate(camera_id, results, timestamp, sequence) {
+            // 直接使用最新的检测结果，不做预测或插值
             detectionResults = results;
+            lastDetectionSequence = sequence;
         }
 
         target: cameraManager
     }
+    
     Image {
         id: processedImage
 
@@ -177,8 +187,9 @@ HusWindow {
             z: 30
         }
     }
+    
     Repeater {
-        model: detectionResults   // QVariantList
+        model: detectionResults   // 直接使用检测结果
 
         delegate: Item {
             property var rect: descaleFaceResult(modelData.x, modelData.y, modelData.width, modelData.height, processedImage.fillMode)

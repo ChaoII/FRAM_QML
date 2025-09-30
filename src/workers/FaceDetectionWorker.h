@@ -5,6 +5,7 @@
 #include "opencv2/opencv.hpp"
 #include "src/ThreadSafeQueue.h"
 #include <QVariantMap>
+#include "src/FrameData.h"
 
 
 struct DetectionResult {
@@ -25,7 +26,7 @@ class FaceDetectionWorker : public WorkerBase {
 public:
     explicit FaceDetectionWorker(QObject* parent = nullptr);
 
-    void setFrameQueue(ThreadSafeQueue<cv::Mat>* queue) {
+    void setFrameQueue(ThreadSafeQueue<FrameData>* queue) {
         frame_queue_ = queue;
     }
 
@@ -34,11 +35,11 @@ public slots:
 
 signals:
     void inferenceError(const QString&);
-    void detectionFinished(const QVariantList& results);
+    void detectionFinished(const QVariantList& results, qint64 timestamp, int sequence);
 
 private:
     void process();
     static QVariantList convertToVariantList(const std::vector<modeldeploy::vision::DetectionLandmarkResult>& dets);
-    ThreadSafeQueue<cv::Mat>* frame_queue_ = nullptr;
+    ThreadSafeQueue<FrameData>* frame_queue_ = nullptr;
     std::unique_ptr<modeldeploy::vision::face::Scrfd> face_model_ = nullptr;
 };

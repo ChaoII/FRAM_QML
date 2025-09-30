@@ -8,6 +8,7 @@
 #include "src/workers/WorkerBase.h"
 #include <opencv2/opencv.hpp>
 #include "src/ThreadSafeQueue.h"
+#include "src/FrameData.h"
 
 
 class CameraDecodeWorker : public WorkerBase {
@@ -20,7 +21,7 @@ public:
 
     void InitMediaDevice(const QString& fileName);
 
-    void setFrameQueue(ThreadSafeQueue<cv::Mat>* queue);
+    void setFrameQueue(ThreadSafeQueue<FrameData>* queue);
 
 public slots:
     void startCameraDecode();
@@ -34,6 +35,7 @@ private:
 
     void process();
 
-    ThreadSafeQueue<cv::Mat>* frame_queue_ = nullptr;
+    ThreadSafeQueue<FrameData>* frame_queue_ = nullptr;
     std::unique_ptr<cv::VideoCapture> cap_ = nullptr;
+    int frame_sequence_ = 0;
 };

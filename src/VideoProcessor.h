@@ -12,6 +12,7 @@
 #include "src/workers/CameraDecodeWorker.h"
 #include "src/workers/FaceDetectionWorker.h"
 #include "src/ThreadSafeQueue.h"
+#include "src/FrameData.h"
 
 class VideoProcessor : public QObject {
     Q_OBJECT
@@ -27,7 +28,7 @@ public:
     Q_ENUM(CameraSourceType)
 
     explicit VideoProcessor(const QString& source, CameraSourceType type, QObject* parent = nullptr);
-    ~VideoProcessor();
+    ~VideoProcessor() override;
     [[nodiscard]] CameraImageProvider* imageProvider() const { return provider_; }
     Q_INVOKABLE void startProcessing();
     Q_INVOKABLE void stopProcessing();
@@ -35,7 +36,7 @@ public:
 
 signals:
     void frameReady();
-    void detectionReady(const QVariantList& results);
+    void detectionReady(const QVariantList& results, qint64 timestamp, int sequence);
     void errorOccurred(const QString& error);
     void processingChanged();
 
@@ -45,7 +46,7 @@ private:
     CameraDecodeWorker* captureWorker_;
     FaceDetectionWorker* inferenceWorker_;
     CameraImageProvider* provider_;
-    ThreadSafeQueue<cv::Mat> frameQueue_;
+    ThreadSafeQueue<FrameData> frameQueue_;
 
     bool processing_{false};
 };

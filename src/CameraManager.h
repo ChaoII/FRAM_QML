@@ -33,8 +33,8 @@ public:
         });
 
         connect(video_processor, &VideoProcessor::detectionReady, this,
-                [this, camera_id](const QVariantList& results) {
-                    emit faceResultUpdate(camera_id, results);
+                [this, camera_id](const QVariantList& results, qint64 timestamp, int sequence) {
+                    emit faceResultUpdate(camera_id, results, timestamp, sequence);
                 });
 
 
@@ -58,7 +58,7 @@ public:
 
 signals:
     void cameraFrameUpdated(const QString& camera_id);
-    void faceResultUpdate(const QString& camera_id, const QVariantList& results);
+    void faceResultUpdate(const QString& camera_id, const QVariantList& results, qint64 timestamp, int sequence);
 
 private:
     QMap<QString, VideoProcessor*> cameras_;

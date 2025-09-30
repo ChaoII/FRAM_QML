@@ -5,6 +5,8 @@
 #include <QTimer>
 #include "CameraDecodeWorker.h"
 
+#include <QDateTime>
+
 
 CameraDecodeWorker::CameraDecodeWorker() {
 }
@@ -26,7 +28,7 @@ void CameraDecodeWorker::InitMediaDevice(const QString& fileName) {
 }
 
 
-void CameraDecodeWorker::setFrameQueue(ThreadSafeQueue<cv::Mat>* queue) {
+void CameraDecodeWorker::setFrameQueue(ThreadSafeQueue<FrameData>* queue) {
     frame_queue_ = queue;
 }
 
@@ -58,7 +60,8 @@ void CameraDecodeWorker::process() {
         emit decodeFinished(matToQImage(frame));
         // 如果有推理队列，也推送到推理线程
         if (frame_queue_) {
-            frame_queue_->push(std::move(frame));
+            FrameData frame_data(frame, QDateTime::currentMSecsSinceEpoch(), ++frame_sequence_);
+            frame_queue_->push(std::move(frame_data));
         }
     }
     // 继续下一帧

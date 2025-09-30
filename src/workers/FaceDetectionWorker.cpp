@@ -37,18 +37,19 @@ QVariantList FaceDetectionWorker::convertToVariantList(
 
 void FaceDetectionWorker::process() {
     if (!is_running_) return;
-    cv::Mat frame;
-    if (frame_queue_ && frame_queue_->try_pop(frame)) {
+    FrameData frame_data;
+    // 使用阻塞等待，确保不丢失帧
+    if (frame_queue_ && frame_queue_->wait_and_pop(frame_data)) {
         try {
             // 预处理
             std::vector<modeldeploy::vision::DetectionLandmarkResult> result;
-            auto frame_ = frame.clone();
+            auto frame_ = frame_data.frame.clone();
             if (!face_model_->predict(modeldeploy::ImageData::from_mat(&frame_), &result)) {
                 qDebug() << "inference Error";
                 emit inferenceError("inference Error");
             }
             auto results = convertToVariantList(result);
-            emit detectionFinished(results);
+            emit detectionFinished(results, frame_data.timestamp, frame_data.sequence);
         }
         catch (const std::exception& e) {
             emit inferenceError(QString::fromStdString(e.what()));
@@ -57,6 +58,7 @@ void FaceDetectionWorker::process() {
 
     // 继续处理
     if (is_running_) {
-        QTimer::singleShot(1, this, &FaceDetectionWorker::process);
+        // 使用更短的延迟以提高响应速度
+        QTimer::singleShot(50, this, &FaceDetectionWorker::process);
     }
 }

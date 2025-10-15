@@ -29,12 +29,13 @@ Item {
             onDetectionRect: function (rects) {
                 detRect.model = rects
             }
+
             onRecognitionResult: function (recRet) {
-                if (!videoOutput.visible || !videoOutput.window) {
-                    console.warn("Skip grabToImage: videoOutput not visible")
-                    return
-                }
                 attendInfo.visible = true
+                attendInfo.isUnknown = recRet.isUnknown
+                attendInfo.name = recRet.name
+                attendInfo.baseImageSource = "file:///"+recRet.picUrl
+                attendInfo.attendTime = recRet.attendTime
                 videoOutput.grabToImage(function (result) {
                     attendInfo.curImageSource = result.url
                 })
@@ -143,7 +144,7 @@ Item {
         height: 160
         width: parent.width
         y: parent.height - 200
-        z: 30
+        z: 9999
         opacity: 0.9
         Rectangle {
             anchors.fill: parent

@@ -13,6 +13,7 @@ find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(faiss REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 qt_standard_project_setup()
 
@@ -20,6 +21,9 @@ qt_add_executable(app_fram_qml
         main.cpp
         core/VectorSearch.cpp
         core/VectorSearch.h
+        core/dbHelper.h
+        schema/schema.h
+        core/dbHelper.cpp
 )
 
 qt_add_qml_module(app_fram_qml
@@ -75,6 +79,7 @@ target_link_libraries(app_fram_qml
         ${OpenCV_LIBS}
         ModelDeploySDK
         faiss
+        SQLite::SQLite3
 )
 
 include(GNUInstallDirs)

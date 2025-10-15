@@ -38,12 +38,13 @@ void VectorSearch::addVectors(const std::vector<int64_t>& ids,
 }
 
 /** 查询（返回最相似的前k个ID） */
-[[nodiscard]] std::vector<int64_t> VectorSearch::search(const std::vector<float>& query, const int k) const {
+[[nodiscard]] std::pair<std::vector<int64_t>, std::vector<float>> VectorSearch::search(
+    const std::vector<float>& query, const int k) const {
     if (index_ == nullptr) return {};
     std::vector<int64_t> indices(k);
     std::vector<float> distances(k);
     index_->search(1, query.data(), k, distances.data(), indices.data());
-    return indices;
+    return {indices, distances};
 }
 
 /** 删除某个向量 */

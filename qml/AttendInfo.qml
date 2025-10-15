@@ -6,6 +6,8 @@ Item {
     id: attend_info
     height: 160
 
+    property bool isUnknown: true
+    property alias baseImageSource: baseImage.source
     property alias curImageSource: currentImage.source
     property alias name: nameText.text
     property alias staffNo: staffNo.text
@@ -13,7 +15,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: "#45FF0000"
+        color: isUnknown ? "#45FF0000" : "#4500FF00"
 
         RowLayout {
             anchors.fill: parent
@@ -24,16 +26,15 @@ Item {
             }
             HusImage {
                 id: baseImage
-                Layout.preferredWidth: 100
-                Layout.preferredHeight: 160
+                Layout.preferredWidth: 120
+                Layout.preferredHeight: 150
                 previewEnabled: false
-                source: "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
             }
 
             HusImage {
                 id: currentImage
-                Layout.preferredWidth: 100
-                Layout.preferredHeight: 160
+                Layout.preferredWidth: 120
+                Layout.preferredHeight: 150
                 previewEnabled: false
                 fillMode: HusImage.PreserveAspectFit
             }
@@ -165,5 +166,9 @@ Item {
                 Layout.fillWidth: true
             }
         }
+    }
+    onIsUnknownChanged:{
+        console.log("------------------------------------------------------")
+        console.log("isUnknownChanged:", isUnknown)
     }
 }

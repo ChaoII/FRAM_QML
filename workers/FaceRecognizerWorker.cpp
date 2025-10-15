@@ -3,10 +3,14 @@
 //
 
 #include "workers/FaceRecognizerWorker.h"
+
+#include <QDateTime>
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QThread>
 #include "utils.h"
+#include "core/dbHelper.h"
+#include "core/VectorSearch.h"
 
 FaceRecognizerWorker::FaceRecognizerWorker(QObject* parent): QObject(parent) {
     face_rec_ = std::make_unique<modeldeploy::vision::face::SeetaFaceID>(
@@ -29,8 +33,28 @@ void FaceRecognizerWorker::processFace(const QImage& image,
         qDebug() << "inference Error";
     }
     QVariantMap map;
-    map["name"] = "张三";
-    map["score"] = "0.75";
+    // 向量检索
+    const auto searchResult = VectorSearch::getInstance().search(result.embedding, 1);
+    const bool isUnknown = searchResult.second[0] < 0.62;
+    if (isUnknown) {
+        qDebug() << "no staff found";
+        map["isUnknown"] = isUnknown;
+        map["staffNo"] = "";
+        map["name"] = "";
+        map["score"] = 0.0;
+        map["picUrl"] = "";
+        map["attendTime"] = "";
+        emit recognizeReady(map);
+        return;
+    }
+    const auto staffs = DBHelper::getInstance().queryStaffByIndexID(searchResult.first[0]);
+    const QString attendTime = QDateTime::currentDateTime().toString("yyyy-MM-ddTHH:mm:ss.zzz");
+    map["unknown"] = isUnknown;
+    map["staffNo"] = QString::fromStdString(staffs[0].staffNo);
+    map["name"] = QString::fromStdString(staffs[0].name);
+    map["score"] = searchResult.second[0];
+    map["picUrl"] = QString::fromStdString(staffs[0].picUrl);
+    map["attendTime"] = attendTime;
     qDebug() << map;
     emit recognizeReady(map);
 }

@@ -1,11 +1,13 @@
 #pragma once
 
+#include <QDateTime>
 #include <QObject>
 #include "core/snowflake.hpp"
 #include <modeldeploy/vision.h>
 #include <QDebug>
 #include <QThread>
 
+#include "core/dbHelper.h"
 #include "core/VectorSearch.h"
 
 class RegisterFaceWorker;
@@ -69,6 +71,25 @@ public slots:
             auto feature = results[0].embedding;
             features.emplace_back(feature);
             indexes.emplace_back(indexId);
+            Staff staff;
+            staff.indexId = indexId;
+            staff.name = name.toStdString();
+            staff.staffNo = staffNo.toStdString();
+            staff.picUrl = imagePath.toStdString();
+            staff.registerTime = QDateTime::currentDateTime().toString("yyyy-MM-ddTHH:mm:ss.zzz").toStdString();
+            try {
+                DBHelper::getStorage().insert(staff);
+            }
+            catch (const std::exception& e) {
+                qDebug() << "Insert staff failed, "
+                    "indexId is: " << indexId << ","
+                    "name is: " << name << ","
+                    "file path is: " << imagePath << ","
+                    "error message: " << e.what() << ", "
+                    "register will fallback!";
+                emit registerFailed();
+                return;
+            }
         }
         // 保存到向量数据库
         VectorSearch::getInstance().addVectors(indexes, features);

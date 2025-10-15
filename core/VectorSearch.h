@@ -22,7 +22,8 @@ public:
                     const std::vector<std::vector<float>>& vecs);
 
     /** 查询（返回最相似的前k个ID） */
-    [[nodiscard]] std::vector<int64_t> search(const std::vector<float>& query, int k) const;
+    [[nodiscard]] std::pair<std::vector<int64_t>, std::vector<float>> search(
+        const std::vector<float>& query, int k) const;
 
     /** 删除某个向量 */
     void removeVector(int64_t id);

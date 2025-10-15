@@ -6,9 +6,13 @@
 #include "registerface.h"
 
 
+
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
+
+
+
 
     qmlRegisterType<FrameAnalyzer>("MyApp", 1, 0, "FrameAnalyzer");
     qmlRegisterType<RegisterFace>("MyApp", 1, 0, "RegisterFace");

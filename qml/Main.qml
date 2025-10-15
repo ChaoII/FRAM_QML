@@ -18,6 +18,8 @@ HusWindow {
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: MainPage { stackView: stackView }  // 把stackView传进去
+        initialItem: MainPage {
+            stackView: stackView
+        }  // 把stackView传进去
     }
 }

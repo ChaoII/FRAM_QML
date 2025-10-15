@@ -7,8 +7,8 @@ import HuskarUI.Basic
 Item {
     id: mainPage
     property var stackView: null
-    CameraManager{
-        id:cameraManager
+    CameraManager {
+        id: cameraManager
     }
 
     Timer {
@@ -82,9 +82,9 @@ Item {
             stackView: mainPage.stackView
         }
     }
-    Component{
-        id:settingsComponent
-        Settings{
+    Component {
+        id: settingsComponent
+        Settings {
             stackView: mainPage.stackView
         }
     }
@@ -159,9 +159,10 @@ Item {
 
     Connections {
         target: stackView
+
         function onCurrentItemChanged() {
             if (stackView.currentItem === mainPage) {
-                if(cameraManager.isCameraActivated){
+                if (cameraManager.isCameraActivated) {
                     cameraManager.stopCamera()
                 }
                 cameraManager.videoOutput = videoOutput

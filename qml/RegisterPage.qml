@@ -16,6 +16,10 @@ Page {
             message.info("注册成功")
             faceListModel.clear()
         }
+        onRegisterError:function(){
+            message.error("注册失败, 请确保画面中包含人脸")
+            faceListModel.clear()
+        }
     }
 
     CameraManager{

@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 
     qmlRegisterType<FrameAnalyzer>("MyApp", 1, 0, "FrameAnalyzer");
     qmlRegisterType<RegisterFace>("MyApp", 1, 0, "RegisterFace");
-    const QUrl url(QStringLiteral("qrc:/camera/qml/Main.qml"));
+    const QUrl url(QStringLiteral("qrc:/fram_qml/qml/Main.qml"));
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,

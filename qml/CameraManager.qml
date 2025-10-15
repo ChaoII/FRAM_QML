@@ -5,21 +5,26 @@ import QtMultimedia
 QtObject {
     id: cameraManager
     // 摄像头属性
-    property Camera camera: Camera {
+    property Camera camera: Camera
+    {
         id: camera
         active: true
     }
 
-    property ImageCapture imageCapture: ImageCapture {
+    property ImageCapture imageCapture: ImageCapture
+    {
         id: imageCapture
     }
 
-    property alias isCameraActivated : camera.active
-    property MediaDevices mediaDevices: MediaDevices{}
+    property alias isCameraActivated: camera.active
+    property MediaDevices mediaDevices: MediaDevices
+    {
+    }
     // 视频输出（需要在界面中设置具体实例）
     property VideoOutput videoOutput
 
-    property CaptureSession captureSession: CaptureSession {
+    property CaptureSession captureSession: CaptureSession
+    {
         id: captureSession
         camera: camera
         imageCapture: imageCapture

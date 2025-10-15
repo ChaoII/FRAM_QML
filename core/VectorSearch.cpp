@@ -89,7 +89,6 @@ VectorSearch::~VectorSearch() {
 VectorSearch::VectorSearch() {
     const std::string index_path = "index.faiss";
     const int d = 1024; // 默认维度，可按需修改
-
     if (std::filesystem::exists(index_path)) {
         try {
             index_ = faiss::read_index(index_path.c_str());

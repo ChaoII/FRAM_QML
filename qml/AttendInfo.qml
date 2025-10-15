@@ -11,9 +11,9 @@ Item {
     property alias staffNo: staffNo.text
     property alias attendTime: attendTime.text
 
-    Rectangle{
+    Rectangle {
         anchors.fill: parent
-        color:"#45FF0000"
+        color: "#45FF0000"
 
         RowLayout {
             anchors.fill: parent
@@ -55,7 +55,7 @@ Item {
 
                         text: "姓名:"
                         anchors.fill: parent
-                        anchors.rightMargin:  10
+                        anchors.rightMargin: 10
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignRight
                     }
@@ -101,7 +101,7 @@ Item {
                     HusText {
                         id: staffNo
                         anchors.fill: parent
-                        anchors.leftMargin:  10
+                        anchors.leftMargin: 10
                         verticalAlignment: Text.AlignVCenter
                         text: "HR12138"
                     }
@@ -129,7 +129,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     HusText {
-                        id:attendTime
+                        id: attendTime
                         anchors.leftMargin: 10
                         anchors.fill: parent
                         verticalAlignment: Text.AlignVCenter

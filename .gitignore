@@ -1,7 +1,6 @@
 # Prerequisites
 *.d
 
-
 build
 .idea
 CMakeLists.txt.user

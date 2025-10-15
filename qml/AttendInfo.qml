@@ -6,6 +6,7 @@ Item {
     id: attend_info
     height: 160
 
+    property alias curImageSource: currentImage.source
     property alias name: nameText.text
     property alias staffNo: staffNo.text
     property alias attendTime: attendTime.text
@@ -17,13 +18,10 @@ Item {
         RowLayout {
             anchors.fill: parent
             spacing: 10  // 元素间间距
-
             // 左侧弹簧
             Item {
                 Layout.fillWidth: true
             }
-
-
             HusImage {
                 id: baseImage
                 Layout.preferredWidth: 100
@@ -37,7 +35,7 @@ Item {
                 Layout.preferredWidth: 100
                 Layout.preferredHeight: 160
                 previewEnabled: false
-                source: "https://gw.alipayobjects.com/zos/antfincdn/LlvErxo8H9/photo-1503185912284-5271ff81b9a8.webp"
+                fillMode: HusImage.PreserveAspectFit
             }
 
             GridLayout {

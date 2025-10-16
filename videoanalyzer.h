@@ -3,7 +3,7 @@
 #include "workers/FaceRecognizerWorker.h"
 #include <QImage>
 #include <QObject>
-#include <QPainter>
+#include <QTimer>
 #include <QThread>
 #include <QVideoFrame>
 #include <QVideoSink>
@@ -46,6 +46,8 @@ private slots:
     void onNewFrame(const QVideoFrame& frame);
 
 private:
+    QTimer* timer_ = nullptr;
+
     QVideoSink* sink_ = nullptr;
     QSize dstSize_ = QSize(320, 600);
     QThread* faceDetWorkerThread_;

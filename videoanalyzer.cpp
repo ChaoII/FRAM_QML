@@ -5,6 +5,7 @@
 
 
 FrameAnalyzer::FrameAnalyzer(QObject* parent) : QObject(parent) {
+    // 人脸检测线程
     faceDetWorkerThread_ = new QThread(this);
     faceDetWorker_ = new FaceDetectionWorker();
     faceDetWorker_->moveToThread(faceDetWorkerThread_);
@@ -20,7 +21,7 @@ FrameAnalyzer::FrameAnalyzer(QObject* parent) : QObject(parent) {
                 busy_ = false;
             });
     faceDetWorkerThread_->start();
-
+    // 人脸识别线程
     faceRecWorkerThread_ = new QThread(this);
     faceRecWorker_ = new FaceRecognizerWorker();
     faceRecWorker_->moveToThread(faceRecWorkerThread_);
@@ -31,18 +32,23 @@ FrameAnalyzer::FrameAnalyzer(QObject* parent) : QObject(parent) {
         });
     connect(faceRecWorker_, &FaceRecognizerWorker::recognizeReady, this, &FrameAnalyzer::recognitionResult);
     faceRecWorkerThread_->start();
+
+    // 定期保存打卡记录定时器(去重)
+    timer_ = new QTimer(this);
+    timer_->setInterval(5000);
+    connect(timer_, &QTimer::timeout, faceRecWorker_, &FaceRecognizerWorker::saveAttendInfo);
+    timer_->start();
 }
+
 
 FrameAnalyzer::~FrameAnalyzer() {
     if (faceDetWorkerThread_) {
         faceDetWorkerThread_->quit();
         faceDetWorkerThread_->wait();
-        delete faceDetWorker_;
     }
     if (faceRecWorkerThread_) {
         faceRecWorkerThread_->quit();
         faceRecWorkerThread_->wait();
-        delete faceRecWorker_;
     }
     if (sink_) {
         disconnect(sink_, nullptr, this, nullptr);

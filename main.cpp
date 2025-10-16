@@ -4,15 +4,14 @@
 #include "videoanalyzer.h"
 #include "husapp.h"
 #include "registerface.h"
-
+#include "task/ClearOldAttendInfoTask.h"
 
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-
-
+    ClearOldAttendInfoTask::start();
 
     qmlRegisterType<FrameAnalyzer>("MyApp", 1, 0, "FrameAnalyzer");
     qmlRegisterType<RegisterFace>("MyApp", 1, 0, "RegisterFace");

@@ -59,7 +59,7 @@ bool DBHelper::updateStaff(const Staff& staff) {
 
 bool DBHelper::insertAttendInfo(const AttendInfo& attendInfo) {
     try {
-        storage_.update(attendInfo);
+        storage_.insert(attendInfo);
         return true;
     }
     catch (const std::exception& e) {

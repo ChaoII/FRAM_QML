@@ -16,6 +16,7 @@ inline auto createStorage() {
                                            make_column("pic_url", &Staff::picUrl)),
                                 make_table("attend_infos",
                                            make_column("id", &AttendInfo::id, primary_key().autoincrement()),
+                                            make_column("staff_no", &AttendInfo::staffNo),
                                            make_column("name", &AttendInfo::name),
                                            make_column("attend_time", &AttendInfo::attendTime),
                                            make_column("pic_url", &AttendInfo::picUrl)));

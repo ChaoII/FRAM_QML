@@ -9,7 +9,7 @@ set(ModelDeploy_DIR "E:/CLionProjects/ModelDeploy/build/install")
 set(faiss_DIR "D:/faiss/install/share/faiss")
 set(HuskarUI_DIR "D:/HuskarUI")
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia Concurrent)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(faiss REQUIRED)
@@ -24,6 +24,10 @@ qt_add_executable(app_fram_qml
         core/dbHelper.h
         schema/schema.h
         core/dbHelper.cpp
+        task/ScheduledTask.cpp
+        task/ScheduledTask.h
+        task/ClearOldAttendInfoTask.cpp
+        task/ClearOldAttendInfoTask.h
 )
 
 qt_add_qml_module(app_fram_qml
@@ -74,6 +78,7 @@ target_link_directories(app_fram_qml PRIVATE
 target_link_libraries(app_fram_qml
         PRIVATE
         Qt6::Quick
+        Qt6::Concurrent
         Qt6::Multimedia
         HuskarUIBasic
         ${OpenCV_LIBS}

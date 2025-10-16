@@ -20,6 +20,7 @@ struct Staff {
 
 struct AttendInfo {
     int id;
+    std::string staffNo;
     std::string name;
     std::string attendTime;
     std::string picUrl;

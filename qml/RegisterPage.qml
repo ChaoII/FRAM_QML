@@ -22,9 +22,7 @@ Page {
         }
     }
 
-    CameraManager{
-        id:cameraManager
-    }
+
 
     VideoOutput {
         id: registerPreview
@@ -163,12 +161,12 @@ Page {
 
 
     Component.onCompleted: {
-        if(cameraManager.isCameraActivated){
-            cameraManager.stopCamera()
+        if(CameraManager.isCameraActivated){
+            CameraManager.stopCamera()
         }
-        cameraManager.videoOutput = registerPreview
+        CameraManager.videoOutput = registerPreview
         console.log("RegisterPage created, starting camera...")
-        cameraManager.startCamera()
+        CameraManager.startCamera()
         addBtn.forceActiveFocus()
     }
 

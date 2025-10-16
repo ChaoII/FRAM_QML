@@ -1,15 +1,13 @@
 import QtQuick
 import QtQuick.Controls
 import QtMultimedia
-import MyApp
 import HuskarUI.Basic
+import MyApp
+
 
 Item {
     id: mainPage
     property var stackView: null
-    CameraManager {
-        id: cameraManager
-    }
 
     Timer {
         id: hideTimer
@@ -33,8 +31,9 @@ Item {
             onRecognitionResult: function (recRet) {
                 attendInfo.visible = true
                 attendInfo.isUnknown = recRet.isUnknown
+                attendInfo.staffNo = recRet.staffNo
                 attendInfo.name = recRet.name
-                attendInfo.baseImageSource = "file:///"+recRet.picUrl
+                attendInfo.baseImageSource = "file:" + recRet.picUrl
                 attendInfo.attendTime = recRet.attendTime
                 videoOutput.grabToImage(function (result) {
                     attendInfo.curImageSource = result.url
@@ -49,7 +48,7 @@ Item {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 8
-        text: "摄像头状态: " + (cameraManager.camera.active ? "运行中" : "已停止")
+        text: "摄像头状态: " + (CameraManager.isCameraActive ? "运行中" : "已停止")
         color: "white"
     }
 
@@ -71,7 +70,7 @@ Item {
                     width: 8
                     height: 8
                     radius: 4
-                    color: "#ffff00"
+                    color: "#ff00ff"
                 }
             }
         }
@@ -90,6 +89,13 @@ Item {
         }
     }
 
+    Component {
+        id: attendhistoryComponent
+        AttendHistory {
+            stackView: mainPage.stackView
+        }
+    }
+
 
     Row {
         id: controls
@@ -97,6 +103,17 @@ Item {
         anchors.bottomMargin: 8
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 8
+
+        HusButton {
+            id: btnAttendHistory
+            text: "打卡记录"
+            onClicked: {
+                stackView.push(attendhistoryComponent)
+                if (CameraManager.isCameraActivated) {
+                    CameraManager.stopCamera()
+                }
+            }
+        }
 
         HusButton {
             id: btnRegister
@@ -111,29 +128,6 @@ Item {
             text: "设置"
             onClicked: {
                 stackView.push(settingsComponent)
-            }
-        }
-
-        HusButton {
-            text: cameraManager.camera.active ? "关闭摄像头" : "打开摄像头"
-            onClicked: toggleCamera()
-        }
-
-        HusSelect {
-            id: cb
-            width: 200
-            colorBg: "#00000000"
-            model: cameraManager.availableCameras
-            textRole: "description"
-            valueRole: []
-            Component.onCompleted: {
-                if (cameraManager.availableCameras.length > 0) currentIndex = 0
-                console.log(cameraManager.availableCameras)
-            }
-            onActivated: {
-                console.log(currentIndex)
-                console.log(currentText)
-                switchCamera()
             }
         }
     }
@@ -154,20 +148,19 @@ Item {
     }
 
     Component.onCompleted: {
-        cameraManager.videoOutput = videoOutput
-        cameraManager.startCamera()
+        CameraManager.videoOutput = videoOutput
+        CameraManager.startCamera()
     }
 
     Connections {
         target: stackView
-
         function onCurrentItemChanged() {
             if (stackView.currentItem === mainPage) {
-                if (cameraManager.isCameraActivated) {
-                    cameraManager.stopCamera()
+                if (CameraManager.isCameraActivated) {
+                    CameraManager.stopCamera()
                 }
-                cameraManager.videoOutput = videoOutput
-                cameraManager.startCamera()
+                CameraManager.videoOutput = videoOutput
+                CameraManager.startCamera()
             }
         }
     }

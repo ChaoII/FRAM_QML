@@ -1,4 +1,6 @@
 // CameraManager.qml
+pragma Singleton
+
 import QtQuick
 import QtMultimedia
 
@@ -16,7 +18,8 @@ QtObject {
         id: imageCapture
     }
 
-    property alias isCameraActivated: camera.active
+    readonly property bool isCameraActive: camera.active
+
     property MediaDevices mediaDevices: MediaDevices
     {
     }

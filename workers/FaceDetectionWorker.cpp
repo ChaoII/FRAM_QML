@@ -9,9 +9,12 @@
 #include <QTimer>
 
 FaceDetectionWorker::FaceDetectionWorker(QObject* parent) {
+
+    modeldeploy::RuntimeOption option;
+    option.set_cpu_thread_num(1);
     face_det_ = std::make_unique<modeldeploy::vision::face::Scrfd>(
         "E:/CLionProjects/ModelDeploy/test_data/test_models/face/"
-        "scrfd_2.5g_bnkps_shape640x640.onnx");
+        "scrfd_2.5g_bnkps_shape640x640.onnx",option);
 }
 
 void FaceDetectionWorker::processFrame(const QImage& image) {

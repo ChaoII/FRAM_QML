@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
+    engine.addImportPath(QGuiApplication::applicationDirPath()+"/qml");
+        qDebug() << engine.importPathList();
     engine.load(url);
     HusApp::initialize(&engine);
     return app.exec();

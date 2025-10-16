@@ -4,19 +4,16 @@ import HuskarUI.Basic
 
 Item {
     property var stackView: null
-    property alias cameraManager: cameraManager
-    CameraManager {
-        id: cameraManager
-    }
+
     HusSelect {
         x: 20
         y: 80
         id: cameraSelector
-        model: cameraManager.availableCameras
+        model: CameraManager.availableCameras
         textRole: "description"
         valueRole: []
         onActivated: {
-            cameraManager.switchCamera(currentValue.id)
+            CameraManager.switchCamera(currentValue.id)
         }
         z: 100
     }
@@ -24,7 +21,7 @@ Item {
     HusText {
         x: 200
         y: 80
-        text: "Camera status: " + (cameraManager.camera.active ? "Active" : "Inactive")
+        text: "Camera status: " + (CameraManager.isCameraActive ? "Active" : "Inactive")
         color: "black"
     }
 
@@ -37,7 +34,7 @@ Item {
         fillMode: VideoOutput.PreserveAspectCrop
         // 在组件完成时设置 videoOutput
         Component.onCompleted: {
-            cameraManager.videoOutput = videoOutput
+            CameraManager.videoOutput = videoOutput
         }
     }
 
@@ -79,7 +76,7 @@ Item {
         text: "Apply Settings"
         onClicked: {
             // 应用其他设置...
-            cameraManager.startCamera()
+            CameraManager.startCamera()
         }
     }
 }

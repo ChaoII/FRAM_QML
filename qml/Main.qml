@@ -3,6 +3,10 @@ import QtQuick.Controls
 import QtMultimedia
 import MyApp
 import HuskarUI.Basic
+// 导入模块的同时将模块中的单例类进行实例化
+import fram_qml
+import AttendInfo2
+
 
 HusWindow {
     id: root
@@ -10,11 +14,8 @@ HusWindow {
     height: 600
     visible: true
     title: ""
-    property alias cameraManager: cameraManager
-
-    CameraManager {
-        id: cameraManager
-    }
+    captionBar.visible: false
+    AttendInfo2{}
     StackView {
         id: stackView
         anchors.fill: parent

@@ -14,8 +14,10 @@
 
 
 FaceRecognizerWorker::FaceRecognizerWorker(QObject* parent): QObject(parent) {
+    modeldeploy::RuntimeOption option;
+    option.set_cpu_thread_num(1);
     face_rec_ = std::make_unique<modeldeploy::vision::face::SeetaFaceID>(
-        "E:/CLionProjects/ModelDeploy/test_data/test_models/face/face_recognizer.onnx");
+        "E:/CLionProjects/ModelDeploy/test_data/test_models/face/face_recognizer.onnx",option);
 }
 
 void FaceRecognizerWorker::processFace(const QImage& image,
@@ -78,7 +80,7 @@ void FaceRecognizerWorker::processFace(const QImage& image,
     map["name"] = QString::fromStdString(name);
     map["score"] = searchResult.second[0];
     map["picUrl"] = QString::fromStdString(staff.picUrl);
-    map["attendTime"] = attendTime;
+    map["attendTime"] = attendTime.toString("HH:mm:ss");
     emit recognizeReady(map);
 
     // 缓存打卡信息
@@ -138,6 +140,6 @@ QString FaceRecognizerWorker::createAttendPicUrl(const QString& staffNo) {
     }
     const QString attendPicFileName =
         QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz") + "_" + staffNo + ".jpg";
-    return dir.filePath(attendPicFileName);
+    return dir.absoluteFilePath(attendPicFileName);
 }
 

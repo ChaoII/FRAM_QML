@@ -3,19 +3,19 @@
 //
 
 #pragma once
-#include "task/ScheduledTask.h"
+#include "task/Scheduler.h"
 
 
 class ClearOldAttendInfoTask : QObject {
     Q_OBJECT
 
 public:
-    ClearOldAttendInfoTask(QObject* parent = nullptr);
-
+    explicit ClearOldAttendInfoTask(QObject* parent = nullptr);
 
     static void start();
 
-
 private:
     static bool clearOldAttendInfo();
+
+    static QString getRemoveTime();
 };

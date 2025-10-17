@@ -27,8 +27,8 @@ qt_add_executable(app_fram_qml
         core/dbHelper.h
         schema/schema.h
         core/dbHelper.cpp
-        task/ScheduledTask.cpp
-        task/ScheduledTask.h
+        task/Scheduler.cpp
+        task/Scheduler.h
         task/ClearOldAttendInfoTask.cpp
         task/ClearOldAttendInfoTask.h
         videoanalyzer.h

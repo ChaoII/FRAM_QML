@@ -1,23 +1,20 @@
 //
 // Created by aichao on 2025/10/16.
+// 调度器，用于定时执行任务
 //
 
 #pragma once
-#include <QObject>
-#include <QTimer>
 #include <QtConcurrent>
-#include <QFutureWatcher>
-#include <QDebug>
 #include <functional>
 
 
 
-class ScheduledTask : public QObject {
+class Scheduler : public QObject {
     Q_OBJECT
 public:
-    ScheduledTask(std::function<bool()> taskFunc, qint64 intervalMs, QObject* parent = nullptr);
+    Scheduler(std::function<bool()> taskFunc, qint64 intervalMs, QObject* parent = nullptr);
 
-    ~ScheduledTask() override;
+    ~Scheduler() override;
 
     void start();
     void stop();

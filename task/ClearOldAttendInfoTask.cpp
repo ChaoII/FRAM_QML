@@ -4,18 +4,40 @@
 
 #include "task/ClearOldAttendInfoTask.h"
 #include "core/dbHelper.h"
+#include "core/ConfigManager.h"
+
 
 ClearOldAttendInfoTask::ClearOldAttendInfoTask(QObject* parent): QObject(parent) {
 }
 
+QString ClearOldAttendInfoTask::getRemoveTime() {
+    const int internal = ConfigManager::instance()->clearOldInterval();
+    QString removeTime = QDateTime::currentDateTime().toString("yyyy-MM-ddTHH:mm:ss.zzz");
+
+    switch (ConfigManager::instance()->clearOldUnit()) {
+    case 0:
+        removeTime = QDateTime::currentDateTime().addDays(-internal).toString("yyyy-MM-ddTHH:mm:ss.zzz");
+        break;
+    case 1:
+        removeTime = QDateTime::currentDateTime().addMonths(-internal).toString("yyyy-MM-ddTHH:mm:ss.zzz");
+        break;
+    case 2:
+        removeTime = QDateTime::currentDateTime().addYears(-internal).toString("yyyy-MM-ddTHH:mm:ss.zzz");
+        break;
+    default: ;
+    }
+    return removeTime;
+}
+
+
 bool ClearOldAttendInfoTask::clearOldAttendInfo() {
     try {
         const QDateTime now = QDateTime::currentDateTime();
-        const QString thresholdStr = now.addMonths(-3).toString("yyyy-MM-ddTHH:mm:ss.zzz");
+        const QString removeTime = getRemoveTime();
         auto& storage = DBHelper::getInstance().getStorage();
         const auto oldRecords = storage.get_all<AttendInfo>(
-            where(c(&AttendInfo::attendTime) <= thresholdStr.toStdString())
-            );
+            where(c(&AttendInfo::attendTime) <= removeTime.toStdString())
+        );
         for (const auto& info : oldRecords) {
             QFile file(QString::fromStdString(info.picUrl));
             if (file.exists() && !file.remove()) {
@@ -34,7 +56,7 @@ bool ClearOldAttendInfoTask::clearOldAttendInfo() {
 }
 
 void ClearOldAttendInfoTask::start() {
-    const auto clearOldAttendTask = new ScheduledTask(
-        clearOldAttendInfo, 24*60*60); // 24小时执行一次
+    const auto clearOldAttendTask = new Scheduler(
+        clearOldAttendInfo, 24 * 60 * 60); // 24小时执行一次
     clearOldAttendTask->start();
 }

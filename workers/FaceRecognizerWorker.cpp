@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "core/dbHelper.h"
 #include "core/VectorSearch.h"
+#include "core/ConfigManager.h"
 
 
 FaceRecognizerWorker::FaceRecognizerWorker(QObject* parent): QObject(parent) {
@@ -40,7 +41,8 @@ void FaceRecognizerWorker::processFace(const QImage& image,
 
     // 向量检索
     const auto searchResult = VectorSearch::getInstance().search(result.embedding, 1);
-    const bool isUnknown = searchResult.second.empty() || searchResult.second[0] < 0.62;
+    // 此处来自于配置文件
+    const bool isUnknown = searchResult.second.empty() || searchResult.second[0] < ConfigManager::instance()->recThreshold();
     QVariantMap map;
     map["isUnknown"] = isUnknown;
 
@@ -55,7 +57,7 @@ void FaceRecognizerWorker::processFace(const QImage& image,
         return;
     }
     // 通过向量ID查新员工信息
-    const auto staffs = DBHelper::getInstance().queryStaffByIndexID(searchResult.first[0]);
+    const auto staffs = DBHelper::queryStaffByIndexID(searchResult.first[0]);
     if (staffs.empty()) {
         qWarning() << "[FaceRecognizerWorker] No staff found for index ID:" << searchResult.first[0];
         return;
@@ -117,7 +119,7 @@ void FaceRecognizerWorker::saveAttendInfo() {
             continue;
         }
 
-        if (!DBHelper::getInstance().insertAttendInfo(info)) {
+        if (!DBHelper::insertAttendInfo(info)) {
             qWarning() << "[FaceRecognizerWorker] Failed to insert attend info for staffNo:"
                 << QString::fromStdString(info.staffNo);
         }

@@ -2,16 +2,15 @@
 // Created by aichao on 2025/10/16.
 //
 
-// ScheduledTask.cpp
-#include "ScheduledTask.h"
+#include "Scheduler.h"
 #include <QtConcurrent>
 #include <QDebug>
 
-ScheduledTask::ScheduledTask(std::function<bool()> taskFunc, qint64 intervalMs, QObject* parent)
+Scheduler::Scheduler(std::function<bool()> taskFunc, qint64 intervalMs, QObject* parent)
     : QObject(parent), taskFunc_(std::move(taskFunc)), intervalMs_(intervalMs) {
     timer_ = new QTimer();
     timer_->setInterval(intervalMs_);
-    connect(timer_, &QTimer::timeout, this, &ScheduledTask::runTask);
+    connect(timer_, &QTimer::timeout, this, &Scheduler::runTask);
 
     watcher_ = new QFutureWatcher<bool>(this);
     connect(watcher_, &QFutureWatcher<bool>::finished, this, [this]() {
@@ -26,7 +25,7 @@ ScheduledTask::ScheduledTask(std::function<bool()> taskFunc, qint64 intervalMs, 
     });
 }
 
-ScheduledTask::~ScheduledTask() {
+Scheduler::~Scheduler() {
     stop();
     if (watcher_->isRunning()) {
         watcher_->future().cancel();
@@ -34,16 +33,16 @@ ScheduledTask::~ScheduledTask() {
     }
 }
 
-void ScheduledTask::start() {
+void Scheduler::start() {
     runTask(); // 第一次立即执行
     timer_->start();
 }
 
-void ScheduledTask::stop() {
+void Scheduler::stop() {
     timer_->stop();
 }
 
-void ScheduledTask::runTask() {
+void Scheduler::runTask() {
     if (running_) {
         qWarning() << "[ScheduledTask] 上一次任务还未完成，跳过本次执行";
         return;

@@ -2,6 +2,7 @@
 
 
 #include "videoanalyzer.h"
+#include "core/ConfigManager.h"
 
 
 FrameAnalyzer::FrameAnalyzer(QObject* parent) : QObject(parent) {
@@ -35,7 +36,8 @@ FrameAnalyzer::FrameAnalyzer(QObject* parent) : QObject(parent) {
 
     // 定期保存打卡记录定时器(去重)
     timer_ = new QTimer(this);
-    timer_->setInterval(5000);
+    // 使用配置文件
+    timer_->setInterval(ConfigManager::instance()->attendCacheInterval());
     connect(timer_, &QTimer::timeout, faceRecWorker_, &FaceRecognizerWorker::saveAttendInfo);
     timer_->start();
 }
@@ -71,8 +73,6 @@ QVariantList FrameAnalyzer::convertToVariantList(
     const std::vector<modeldeploy::vision::DetectionLandmarkResult>& dets) {
     QVariantList list;
     for (const auto& r : dets) {
-        if (r.score < 0.5f)
-            continue;
         QVariantMap map;
         map["x"] = r.box.x;
         map["y"] = r.box.y;
@@ -80,7 +80,7 @@ QVariantList FrameAnalyzer::convertToVariantList(
         map["height"] = r.box.height;
         map["score"] = r.score;
         map["label_id"] = r.label_id;
-        // 👉 转换 landmarks
+        // 转换 landmarks
         QVariantList lmList;
         lmList.reserve(static_cast<int>(r.landmarks.size()));
         for (const auto& pt : r.landmarks) {
@@ -118,42 +118,39 @@ void FrameAnalyzer::onNewFrame(const QVideoFrame& frame) {
         // 上一帧还在处理中，丢弃本帧
         return;
     }
-
-    QVideoFrame f(frame);
-    if (!f.isValid())
+    if (!frame.isValid())
         return;
+    // frame.map(QVideoFrame::ReadOnly);
+    const QImage originalImage = frame.toImage();
+    // frame.unmap();
 
-    // f.map(QVideoFrame::ReadOnly);
-    QImage originalImage = f.toImage();
-    // f.unmap();
-
-    QSize originalSize = originalImage.size();
+    const QSize originalSize = originalImage.size();
     if (originalSize.isEmpty()) {
         qWarning() << "Original image is empty";
         return;
     }
 
     // 计算缩放比例（保持宽高比并填充）
-    double scaleX = double(dstSize_.width()) / originalSize.width();
-    double scaleY = double(dstSize_.height()) / originalSize.height();
-    double scale = qMax(scaleX, scaleY); // PreserveAspectCrop 使用最大值
+    const double scaleX = static_cast<double>(dstSize_.width()) / originalSize.width();
+    const double scaleY = static_cast<double>(dstSize_.height()) / originalSize.height();
+    const double scale = qMax(scaleX, scaleY); // PreserveAspectCrop 使用最大值
 
     // 计算缩放后的尺寸
-    QSize scaledSize(qRound(originalSize.width() * scale),
-                     qRound(originalSize.height() * scale));
+    const QSize scaledSize(qRound(originalSize.width() * scale),
+                           qRound(originalSize.height() * scale));
 
     // 计算裁剪区域（居中裁剪）
-    QRect cropRect((scaledSize.width() - dstSize_.width()) / 2,
-                   (scaledSize.height() - dstSize_.height()) / 2,
-                   dstSize_.width(), dstSize_.height());
+    const QRect cropRect((scaledSize.width() - dstSize_.width()) / 2,
+                         (scaledSize.height() - dstSize_.height()) / 2,
+                         dstSize_.width(), dstSize_.height());
 
     // 先缩放到目标尺寸，然后裁剪
-    QImage scaledImage = originalImage.scaled(
+    const QImage scaledImage = originalImage.scaled(
         scaledSize,
         Qt::KeepAspectRatioByExpanding, // 关键：保持比例并扩展
         Qt::SmoothTransformation);
     // 裁剪到 320x600
-    QImage croppedImage = scaledImage.copy(cropRect);
+    const QImage croppedImage = scaledImage.copy(cropRect);
     lastFrame_ = croppedImage;
     emit frameCaptured(croppedImage);
     qDebug() << "Got frame:" << croppedImage.size();

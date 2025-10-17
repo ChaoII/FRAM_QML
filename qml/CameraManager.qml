@@ -80,4 +80,12 @@ QtObject {
             initializeCamera(mediaDevices.defaultVideoInput)
         }
     }
+
+    Component.onDestruction: {
+        if(camera.active){
+            camera.stop()
+        }
+    }
+
+
 }

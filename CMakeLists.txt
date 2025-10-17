@@ -15,99 +15,91 @@ find_package(OpenMP REQUIRED)
 find_package(faiss REQUIRED)
 find_package(SQLite3 REQUIRED)
 
+qt_policy(SET QTP0004 NEW)
+qt_policy(SET QTP0001 NEW)
+
 qt_standard_project_setup()
 
 qt_add_executable(app_fram_qml
-    main.cpp
-    core/VectorSearch.cpp
-    core/VectorSearch.h
-    core/dbHelper.h
-    schema/schema.h
-    core/dbHelper.cpp
-    task/ScheduledTask.cpp
-    task/ScheduledTask.h
-    task/ClearOldAttendInfoTask.cpp
-    task/ClearOldAttendInfoTask.h
-    videoanalyzer.h
-    videoanalyzer.cpp
-    utils.h
-    utils.cpp
-    registerface.h
-    registerface.cpp
-    workers/FaceDetectionWorker.h
-    workers/FaceDetectionWorker.cpp
-    workers/FaceRecognizerWorker.h
-    workers/FaceRecognizerWorker.cpp
+        main.cpp
+        core/VectorSearch.cpp
+        core/VectorSearch.h
+        core/dbHelper.h
+        schema/schema.h
+        core/dbHelper.cpp
+        task/ScheduledTask.cpp
+        task/ScheduledTask.h
+        task/ClearOldAttendInfoTask.cpp
+        task/ClearOldAttendInfoTask.h
+        videoanalyzer.h
+        videoanalyzer.cpp
+        utils.h
+        utils.cpp
+        registerface.h
+        registerface.cpp
+        workers/FaceDetectionWorker.h
+        workers/FaceDetectionWorker.cpp
+        workers/FaceRecognizerWorker.h
+        workers/FaceRecognizerWorker.cpp
+        core/ConfigManager.cpp
+        core/ConfigManager.h
 )
 
 
 set_source_files_properties(qml/CameraManager.qml
-    PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
-set(QTP0004 NEW)
-qt_add_qml_module(AttendInfo2
-    URI MyCo.Frames
-    VERSION 1.0
-    NO_PLUGIN
-    QML_FILES
-    qml/AttendInfo2.qml
-)
-
+        PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(app_fram_qml
-    URI fram_qml
-    VERSION 1.0
-    QML_FILES
-    qml/Main.qml
-    qml/MainPage.qml
-    qml/AttendInfo.qml
-    qml/AttendHistory.qml
-    qml/RegisterPage.qml
-    qml/Settings.qml
-    qml/CameraManager.qml
-    DEPENDENCIES
-        AttendInfo2
+        URI Fram
+        VERSION 1.0
+        RESOURCE_PREFIX "/"
+        QML_FILES
+        qml/Main.qml
+        qml/MainPage.qml
+        qml/AttendInfo.qml
+        qml/AttendHistory.qml
+        qml/RegisterPage.qml
+        qml/Settings.qml
+        qml/CameraManager.qml
 )
-
-
-
-
 
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 set_target_properties(app_fram_qml PROPERTIES
-    #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appcamera
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+        #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appcamera
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        MACOSX_BUNDLE TRUE
+        WIN32_EXECUTABLE TRUE
 )
 
 
 target_include_directories(app_fram_qml PRIVATE
-    "${ModelDeploy_DIR}/include"
-    ${HuskarUI_DIR}/HuskarUI/include)
+        "${CMAKE_CURRENT_SOURCE_DIR}/core"
+        "${ModelDeploy_DIR}/include"
+        ${HuskarUI_DIR}/HuskarUI/include)
 
 target_link_directories(app_fram_qml PRIVATE
-    ${ModelDeploy_DIR}/lib
-    ${HuskarUI_DIR}/HuskarUI/lib
+        ${ModelDeploy_DIR}/lib
+        ${HuskarUI_DIR}/HuskarUI/lib
 )
 target_link_libraries(app_fram_qml
-    PRIVATE
-    Qt6::Quick
-    Qt6::Concurrent
-    Qt6::Multimedia
-    HuskarUIBasic
-    ${OpenCV_LIBS}
-    ModelDeploySDK
-    faiss
-    SQLite::SQLite3
+        PRIVATE
+        Qt6::Quick
+        Qt6::Concurrent
+        Qt6::Multimedia
+        HuskarUIBasic
+        ${OpenCV_LIBS}
+        ModelDeploySDK
+        faiss
+        SQLite::SQLite3
 )
 
 include(GNUInstallDirs)
 install(TARGETS app_fram_qml
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

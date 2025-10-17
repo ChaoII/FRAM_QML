@@ -4,6 +4,7 @@
 
 #include "core/VectorSearch.h"
 #include <iostream>
+#include <filesystem>
 #include <faiss/index_factory.h>
 #include <faiss/IndexIDMap.h>
 #include <faiss/index_io.h>

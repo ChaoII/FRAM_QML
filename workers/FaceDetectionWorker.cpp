@@ -2,6 +2,7 @@
 // Created by aichao on 2025/9/25.
 //
 
+#include "core/ConfigManager.h"
 #include "workers/FaceDetectionWorker.h"
 #include "utils.h"
 #include <QRandomGenerator>
@@ -15,8 +16,8 @@ FaceDetectionWorker::FaceDetectionWorker(QObject* parent) {
     face_det_ = std::make_unique<modeldeploy::vision::face::Scrfd>(
         "E:/CLionProjects/ModelDeploy/test_data/test_models/face/"
         "scrfd_2.5g_bnkps_shape640x640.onnx",option);
+    face_det_->get_postprocessor().set_conf_threshold(ConfigManager::instance()->detThreshold());
 }
-
 void FaceDetectionWorker::processFrame(const QImage& image) {
     std::vector<modeldeploy::vision::DetectionLandmarkResult> result;
     auto mat = Utils::QImageToCvMat(image);

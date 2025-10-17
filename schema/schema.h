@@ -5,7 +5,6 @@
 #pragma once
 
 #include <string>
-#include <memory>
 #include "core/sqlite_orm.h"
 using namespace sqlite_orm;
 

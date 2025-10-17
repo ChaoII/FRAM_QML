@@ -5,7 +5,6 @@
 #pragma once
 #include <faiss/IndexIDMap.h>
 #include <unordered_map>
-#include <filesystem>
 
 class VectorSearch {
 public:

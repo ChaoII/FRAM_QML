@@ -117,7 +117,7 @@ Page {
             focus: true
             onClicked: {
                 registerPreview.grabToImage(function (result) {
-                    var filePath = "C:/Users/aichao/Pictures/capture_" + Date.now() + ".png"
+                    var filePath = "C:/Users/84945/Pictures/capture_" + Date.now() + ".png"
                     // 最多3个
                     if (faceListModel.count >= 3) {
                         faceListModel.remove(0)

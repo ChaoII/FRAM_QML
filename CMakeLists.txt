@@ -6,14 +6,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(OpenCV_DIR "E:/develop/opencv5.x/x64/vc17/staticlib")
 set(ModelDeploy_DIR "E:/CLionProjects/ModelDeploy/build/install")
-set(faiss_DIR "D:/faiss/install/share/faiss")
+set(faiss_DIR "D:/faiss/install1/share/faiss")
 set(HuskarUI_DIR "D:/HuskarUI")
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia Concurrent)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(faiss REQUIRED)
-find_package(SQLite3 REQUIRED)
+find_package(SqliteOrm REQUIRED)
 
 qt_policy(SET QTP0004 NEW)
 qt_policy(SET QTP0001 NEW)
@@ -94,7 +94,7 @@ target_link_libraries(app_fram_qml
         ${OpenCV_LIBS}
         ModelDeploySDK
         faiss
-        SQLite::SQLite3
+        sqlite_orm::sqlite_orm
 )
 
 include(GNUInstallDirs)

@@ -7,7 +7,11 @@
 #include "core/ConfigManager.h"
 
 
+QString ClearOldAttendInfoTask::removeTime_="";
+
 ClearOldAttendInfoTask::ClearOldAttendInfoTask(QObject* parent): QObject(parent) {
+
+    removeTime_ = getRemoveTime();
 }
 
 QString ClearOldAttendInfoTask::getRemoveTime() {
@@ -33,11 +37,11 @@ QString ClearOldAttendInfoTask::getRemoveTime() {
 bool ClearOldAttendInfoTask::clearOldAttendInfo() {
     try {
         const QDateTime now = QDateTime::currentDateTime();
-        const QString removeTime = getRemoveTime();
+        const QString removeTime = removeTime_;
         auto& storage = DBHelper::getInstance().getStorage();
         const auto oldRecords = storage.get_all<AttendInfo>(
             where(c(&AttendInfo::attendTime) <= removeTime.toStdString())
-        );
+            );
         for (const auto& info : oldRecords) {
             QFile file(QString::fromStdString(info.picUrl));
             if (file.exists() && !file.remove()) {

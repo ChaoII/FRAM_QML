@@ -12,7 +12,6 @@ int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    ClearOldAttendInfoTask::start();
     qmlRegisterType<FrameAnalyzer>("MyApp", 1, 0, "FrameAnalyzer");
     qmlRegisterType<RegisterFace>("MyApp", 1, 0, "RegisterFace");
     qmlRegisterSingletonType<ConfigManager>("MyApp", 1, 0, "ConfigManager", ConfigManager::create);
@@ -22,6 +21,7 @@ int main(int argc, char* argv[]) {
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
+    ClearOldAttendInfoTask::start();
 
     // const auto url = QUrl(QStringLiteral("qrc:/Fram/qml/Main.qml"));
     // engine.load(url);

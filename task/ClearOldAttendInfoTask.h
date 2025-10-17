@@ -18,4 +18,6 @@ private:
     static bool clearOldAttendInfo();
 
     static QString getRemoveTime();
+
+    static QString removeTime_;
 };

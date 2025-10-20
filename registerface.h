@@ -23,6 +23,7 @@ public:
                                    const QString& staffNo,
                                    const QStringList& imagePaths);
 
+
 signals:
     void registerInfoReady(const QString& name,
                            const QString& staffNo,

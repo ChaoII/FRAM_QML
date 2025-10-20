@@ -4,31 +4,18 @@ import HuskarUI.Basic
 import Fram
 
 Item {
-    id: attend_info
-
-    property var stackView: null
-
-    Connections{
-        target: searchPage
-
-        function onQueryCkicked(startTime, endTime, name){
-            console.log(startTime,endTime,name)
-            attendHistoryDto.queryAttendHistory(startTime, endTime, name);
-        }
-    }
-
+    id: registerInfo
+    property var stackView: nul
     Component.onCompleted: {
         // 后端会默认当前0点到第二天0点的所有人
-        attendHistoryDto.queryAttendHistory("","", "");
+        registerInfoDto.queryRegisterInfo();
     }
 
-    AttendHistoryDto{
-        id:attendHistoryDto
-        onQueryReady: function(attendHistory){
+    RegisterInfoDto{
+        id:registerInfoDto
+        onQueryReady: function(registerInfos){
             // 处理查询结果
-            attendTable.initModel = attendHistory
-            console.log(attendHistory[0]["name"])
-            console.log("Query ready, got", attendHistory.length, "items");
+            registerInfoTable.initModel = registerInfos
             // 更新界面...
             // busyIndicator.running = false;
         }
@@ -49,10 +36,10 @@ Item {
             id:queryBtn
             HusIconButton {
                 type: HusButton.Type_Primary
-                iconSource: HusIcon.SearchOutlined
+                iconSource: HusIcon.ReloadOutlined
                 Layout.preferredWidth: 35
                 onClicked: {
-                    searchPage.open()
+                    registerInfoDto.queryRegisterInfo();
                 }
             }
             HusIconButton {
@@ -65,10 +52,20 @@ Item {
                     }
                 }
             }
+
+            HusIconButton {
+                type: HusButton.Type_Primary
+                iconSource: HusIcon.UserAddOutlined
+                Layout.preferredWidth: 35
+                onClicked: {
+                    stackView.push(registerComponent)
+                }
+            }
         }
 
+
         HusTableView {
-            id: attendTable
+            id: registerInfoTable
             Layout.fillWidth: true
             Layout.fillHeight: true
             columns: [
@@ -90,8 +87,8 @@ Item {
                     editable: true
                 },
                 {
-                    title: '打卡时间',
-                    dataIndex: 'attendTime',
+                    title: '注册时间',
+                    dataIndex: 'registerTime',
                     width: 150,
                     delegate: textDelegate
                 },
@@ -105,74 +102,16 @@ Item {
             minimumRowHeight: 50
         }
 
-        HusDrawer {
-            id: searchPage
-            signal queryCkicked(string startTime,string endTime,string name)
-            title: qsTr('Basic Drawer')
-            edge:Qt.BottomEdge
-            contentDelegate:Component
-            {
-                Item{
-                    ColumnLayout{
-                        anchors.fill: parent  // 填充父Item
-                        anchors.margins: 20
-                        spacing: 10  // 可选：设置子项间距
-                        HusDateTimePicker{
-                            id:startTimerPicker
-                            Layout.fillWidth: true
-                            placeholderText: qsTr('请选择日期时间')
-                            format: qsTr('yyyy-MM-dd hh:mm:ss')
-                        }
-
-                        HusDateTimePicker{
-                            id:endTimerPicker
-                            Layout.fillWidth: true
-                            placeholderText: qsTr('请选择日期时间')
-                            format: qsTr('yyyy-MM-dd hh:mm:ss')
-
-                        }
-                        HusInput{
-                            id:nameInput
-                            Layout.fillWidth: true
-                            placeholderText:qsTr('请输入姓名')
-                        }
-                        RowLayout{
-                            HusButton{
-                                id:resetBtn
-                                text:qsTr('重置')
-                            }
-                            HusButton{
-                                id:queryBtn
-                                text:qsTr('查询')
-                                onClicked: {
-                                    searchPage.queryCkicked(
-                                                Qt.formatDateTime(startTimerPicker.currentDateTime, "yyyy-MM-ddThh:mm:ss"),
-                                                Qt.formatDateTime(endTimerPicker.currentDateTime, "yyyy-MM-ddThh:mm:ss"),
-                                                nameInput.text
-                                                )
-                                    searchPage.close()
-                                }
-                            }
-                        }
-                        Item{
-                            Layout.fillHeight: true
-                        }
-                        Component.onCompleted: {
-                            let now = new Date();
-                            let todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                            let tomorrowStart = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
-                            startTimerPicker.setDateTime(todayStart)
-                            endTimerPicker.setDateTime(tomorrowStart)
-                        }}
-                }
+        Component{
+            id:registerComponent
+            RegisterPage{
+                stackView: registerInfo.stackView
             }
+
         }
-
-
 
         Component {
             id: imageDelegate
-
             HusImage {
                 fillMode: HusImage.PreserveAspectFit
                 source: "file:" + cellData

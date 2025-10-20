@@ -6,6 +6,7 @@ import QtMultimedia
 
 QtObject {
     id: cameraManager
+
     // 摄像头属性
     property Camera camera: Camera
     {
@@ -18,7 +19,7 @@ QtObject {
         id: imageCapture
     }
 
-    readonly property bool isCameraActive: camera.active
+    readonly property bool isCameraActivated: camera.active
 
     property MediaDevices mediaDevices: MediaDevices
     {
@@ -58,7 +59,14 @@ QtObject {
 
     // 切换摄像头
     function switchCamera(deviceId) {
-        initializeCamera(deviceId)
+        // 先停止当前摄像头
+        // camera.stop()
+
+        // 使用 Timer 延迟切换，给系统时间释放资源
+        Qt.callLater(function() {
+            initializeCamera(deviceId)
+            // camera.start()
+        })
     }
 
     // 开始摄像头

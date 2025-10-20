@@ -23,12 +23,147 @@ Page {
     }
 
 
-
     VideoOutput {
         id: registerPreview
         anchors.fill:parent
         fillMode: VideoOutput.PreserveAspectCrop
     }
+    Item{
+        anchors.fill:parent
+        Canvas {
+            id: faceMask
+            anchors.fill: parent
+            z: 1
+
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.reset()
+
+                // 绘制半透明黑色背景
+                ctx.fillStyle = "#80000000"
+                ctx.fillRect(0, 0, width, height)
+
+                // 设置不绘制模式（挖空人脸区域）
+                ctx.globalCompositeOperation = "destination-out"
+
+                // 绘制人脸轮廓（包括耳朵和肩膀）
+                var centerX = width / 2
+                var centerY = height / 2
+                var faceWidth = Math.min(width, height) * 0.6
+                var faceHeight = faceWidth * 1.3
+
+                ctx.beginPath()
+
+                // 头顶部分（半圆）
+                ctx.arc(centerX, centerY - faceHeight * 0.35, faceWidth * 0.5, Math.PI, 0, false)
+
+                // 右耳
+                ctx.lineTo(centerX + faceWidth * 0.55, centerY - faceHeight * 0.2)
+                ctx.quadraticCurveTo(
+                    centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
+                    centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
+                )
+
+                // 下巴到右肩
+                ctx.lineTo(centerX + faceWidth * 0.4, centerY + faceHeight * 0.5)
+                ctx.quadraticCurveTo(
+                    centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
+                    centerX, centerY + faceHeight * 0.55
+                )
+
+                // 左肩到左耳
+                ctx.quadraticCurveTo(
+                    centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
+                    centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
+                )
+                ctx.lineTo(centerX - faceWidth * 0.5, centerY + faceHeight * 0.1)
+                ctx.quadraticCurveTo(
+                    centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
+                    centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
+                )
+
+                ctx.closePath()
+                ctx.fill()
+
+                // 恢复绘制模式
+                ctx.globalCompositeOperation = "source-over"
+
+                // 绘制白色边框
+                ctx.strokeStyle = "white"
+                ctx.lineWidth = 2
+                ctx.beginPath()
+
+                // 头顶部分（半圆）
+                ctx.arc(centerX, centerY - faceHeight * 0.35, faceWidth * 0.5, Math.PI, 0, false)
+
+                // 右耳
+                ctx.lineTo(centerX + faceWidth * 0.55, centerY - faceHeight * 0.2)
+                ctx.quadraticCurveTo(
+                    centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
+                    centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
+                )
+
+                // 下巴到右肩
+                ctx.lineTo(centerX + faceWidth * 0.4, centerY + faceHeight * 0.5)
+                ctx.quadraticCurveTo(
+                    centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
+                    centerX, centerY + faceHeight * 0.55
+                )
+
+                // 左肩到左耳
+                ctx.quadraticCurveTo(
+                    centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
+                    centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
+                )
+                ctx.lineTo(centerX - faceWidth * 0.5, centerY + faceHeight * 0.1)
+                ctx.quadraticCurveTo(
+                    centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
+                    centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
+                )
+
+                ctx.stroke()
+
+                // 绘制四个角标
+                var cornerSize = 30
+                var cornerLength = 15
+
+                function drawCorner(x, y, rotation) {
+                    ctx.save()
+                    ctx.translate(x, y)
+                    ctx.rotate(rotation * Math.PI / 180)
+
+                    ctx.beginPath()
+                    ctx.moveTo(0, cornerLength)
+                    ctx.lineTo(0, 0)
+                    ctx.lineTo(cornerLength, 0)
+                    ctx.stroke()
+
+                    ctx.restore()
+                }
+
+                // 左上角
+                drawCorner(centerX - faceWidth * 0.55, centerY - faceHeight * 0.35, 0)
+                // 右上角
+                drawCorner(centerX + faceWidth * 0.55, centerY - faceHeight * 0.35, 90)
+                // 右下角
+                drawCorner(centerX + faceWidth * 0.55, centerY + faceHeight * 0.55, 180)
+                // 左下角
+                drawCorner(centerX - faceWidth * 0.55, centerY + faceHeight * 0.55, 270)
+            }
+        }
+
+        // 提示文字
+        Text {
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 50
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "请将人脸对准轮廓区域"
+            color: "white"
+            font.pixelSize: 20
+        }
+    }
+
+
     Column{
         x:20
         y:20
@@ -58,9 +193,6 @@ Page {
             }
         }
     }
-
-
-
 
     RowLayout {
         id: row
@@ -117,13 +249,13 @@ Page {
             focus: true
             onClicked: {
                 registerPreview.grabToImage(function (result) {
-                    var filePath = "C:/Users/84945/Pictures/capture_" + Date.now() + ".png"
+                    var filePath = "C:/Users/aichao/Pictures/capture_" + Date.now() + ".png"
                     // 最多3个
                     if (faceListModel.count >= 3) {
                         faceListModel.remove(0)
                     }
                     result.saveToFile(filePath)
-                    faceListModel.append({"url":"file:///"+filePath})
+                    faceListModel.append({"url":"file:"+filePath})
                 })
             }
         }
@@ -144,30 +276,25 @@ Page {
                 for (var i = 0; i < faceListModel.count; i++) {
                     // 去掉 file:/// 前缀
                     var path = faceListModel.get(i).url;
-                    if (path.startsWith("file:///")) {
-                        path = path.substring(8)// 去掉 file:///
+                    if (path.startsWith("file:")) {
+                        path = path.substring(5)// 去掉 file:///
                     }
                     paths.push(path)
                 }
                 registerFace.processImages(name,staffNo,paths)
             }
         }
-
     }
 
     Connections {
 
     }
 
-
     Component.onCompleted: {
-        if(CameraManager.isCameraActivated){
-            CameraManager.stopCamera()
-        }
-        CameraManager.videoOutput = registerPreview
-        console.log("RegisterPage created, starting camera...")
-        CameraManager.startCamera()
-        addBtn.forceActiveFocus()
+        Qt.callLater(function(){
+            CameraManager.videoOutput = registerPreview
+            console.log("RegisterPage created, starting camera...")
+        })
     }
 
     // Component.onDestruction: {

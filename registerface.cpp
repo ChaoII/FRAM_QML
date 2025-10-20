@@ -16,6 +16,7 @@ RegisterFace::RegisterFace(QObject* parent): QObject(parent) {
 }
 
 
+
 RegisterFace::~RegisterFace() {
     if (registerThread_) {
         registerThread_->quit();

@@ -16,6 +16,7 @@ Item {
         onTriggered: attendInfo.visible = false
     }
 
+
     VideoOutput {
         id: videoOutput
         anchors.fill: parent
@@ -41,6 +42,7 @@ Item {
                 hideTimer.restart()
             }
         }
+
     }
 
     HusText {
@@ -48,7 +50,7 @@ Item {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 8
-        text: "摄像头状态: " + (CameraManager.isCameraActive ? "运行中" : "已停止")
+        text: "摄像头状态: " + (CameraManager.isCameraActivated ? "运行中" : "已停止")
         color: "white"
     }
 
@@ -76,12 +78,15 @@ Item {
         }
     }
 
+
+
     Component {
-        id: registerComponent
-        RegisterPage {
+        id: registerInfosComponent
+        RegisterInfos {
             stackView: mainPage.stackView
         }
     }
+
     Component {
         id: settingsComponent
         Settings {
@@ -110,16 +115,17 @@ Item {
             onClicked: {
                 stackView.push(attendhistoryComponent)
                 if (CameraManager.isCameraActivated) {
-                    CameraManager.stopCamera()
+                    // 异步调用
+                    Qt.callLater(CameraManager.stopCamera)
                 }
             }
         }
 
         HusButton {
-            id: btnRegister
-            text: "注册"
+            id: btnRegisterInfo
+            text: "注册信息"
             onClicked: {
-                stackView.push(registerComponent)
+                stackView.push(registerInfosComponent)
             }
         }
 
@@ -156,11 +162,10 @@ Item {
         target: stackView
         function onCurrentItemChanged() {
             if (stackView.currentItem === mainPage) {
-                if (CameraManager.isCameraActivated) {
-                    CameraManager.stopCamera()
+                if (!CameraManager.isCameraActivated) {
+                    CameraManager.startCamera()
                 }
                 CameraManager.videoOutput = videoOutput
-                CameraManager.startCamera()
             }
         }
     }

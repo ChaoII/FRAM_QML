@@ -7,16 +7,6 @@ import MyApp
 Item {
     property var stackView: null
 
-    function getAfterLabelFromIndex(index) {
-        switch (index) {
-        case 0:
-            return "日";
-        case 1:
-            return "月";
-        case 2:
-            return "年";
-        }
-    }
     function getIndexFromAfterLabel(label) {
         switch (label) {
         case "日":
@@ -174,7 +164,7 @@ Item {
                     }
                 ]
                 animationEnabled: false
-                currentAfterLabel: getAfterLabelFromIndex(ConfigManager.clearOldUnit)
+                initAfterLabelIndex: ConfigManager.clearOldUnit
                 value: ConfigManager.clearOldInterval
             }
         }

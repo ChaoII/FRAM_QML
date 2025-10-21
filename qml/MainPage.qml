@@ -114,10 +114,6 @@ Item {
             text: "打卡记录"
             onClicked: {
                 stackView.push(attendhistoryComponent)
-                if (CameraManager.isCameraActivated) {
-                    // 异步调用
-                    Qt.callLater(CameraManager.stopCamera)
-                }
             }
         }
 

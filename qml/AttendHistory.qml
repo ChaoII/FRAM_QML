@@ -10,7 +10,6 @@ Item {
 
     Connections{
         target: searchPage
-
         function onQueryCkicked(startTime, endTime, name){
             console.log(startTime,endTime,name)
             attendHistoryDto.queryAttendHistory(startTime, endTime, name);
@@ -20,6 +19,7 @@ Item {
     Component.onCompleted: {
         // 后端会默认当前0点到第二天0点的所有人
         attendHistoryDto.queryAttendHistory("","", "");
+        CameraManager.videoOutput = null
     }
 
     AttendHistoryDto{

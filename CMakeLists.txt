@@ -12,6 +12,7 @@ set(HuskarUI_DIR "D:/HuskarUI")
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia Concurrent)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(faiss REQUIRED)
@@ -49,6 +50,8 @@ qt_add_executable(app_fram_qml
         attendhistorydto.cpp
         registerinfodto.h
         registerinfodto.cpp
+        qmlimageutils.h
+        qmlimageutils.cpp
 )
 
 
@@ -68,6 +71,7 @@ qt_add_qml_module(app_fram_qml
         qml/Settings.qml
         qml/CameraManager.qml
         qml/RegisterInfos.qml
+
 )
 
 
@@ -103,7 +107,7 @@ target_link_libraries(app_fram_qml
         faiss
         sqlite_orm::sqlite_orm
 )
-target_link_libraries(app_fram_qml PRIVATE Qt6::Core)
+
 
 include(GNUInstallDirs)
 install(TARGETS app_fram_qml

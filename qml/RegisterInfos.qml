@@ -9,6 +9,7 @@ Item {
     Component.onCompleted: {
         // 后端会默认当前0点到第二天0点的所有人
         registerInfoDto.queryRegisterInfo();
+        CameraManager.videoOutput = null
     }
 
     RegisterInfoDto{
@@ -52,13 +53,21 @@ Item {
                     }
                 }
             }
-
             HusIconButton {
                 type: HusButton.Type_Primary
                 iconSource: HusIcon.UserAddOutlined
                 Layout.preferredWidth: 35
                 onClicked: {
                     stackView.push(registerComponent)
+                }
+            }
+
+            HusIconButton {
+                type: HusButton.Type_Primary
+                iconSource: HusIcon.UserDeleteOutlined
+                Layout.preferredWidth: 35
+                onClicked: {
+                    console.log("delete staff clicked")
                 }
             }
         }
@@ -109,7 +118,6 @@ Item {
             }
 
         }
-
         Component {
             id: imageDelegate
             HusImage {
@@ -122,14 +130,12 @@ Item {
 
             HusText {
                 id: displayText
-
                 color: HusTheme.Primary.colorTextBase
                 horizontalAlignment: Text.AlignHCenter
                 leftPadding: 8
                 rightPadding: 8
                 text: cellData
                 verticalAlignment: Text.AlignVCenter
-
                 TextMetrics {
                     id: displayWidth
 

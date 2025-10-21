@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtMultimedia
 import MyApp
 import HuskarUI.Basic
-
+import Fram
 
 Page {
     id: registerPage
@@ -20,6 +20,10 @@ Page {
             message.error("注册失败, 请确保画面中包含人脸")
             faceListModel.clear()
         }
+    }
+
+    QmlImageUtils{
+        id:qmlImageUtils
     }
 
 
@@ -60,27 +64,27 @@ Page {
                 // 右耳
                 ctx.lineTo(centerX + faceWidth * 0.55, centerY - faceHeight * 0.2)
                 ctx.quadraticCurveTo(
-                    centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
-                    centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
-                )
+                            centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
+                            centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
+                            )
 
                 // 下巴到右肩
                 ctx.lineTo(centerX + faceWidth * 0.4, centerY + faceHeight * 0.5)
                 ctx.quadraticCurveTo(
-                    centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
-                    centerX, centerY + faceHeight * 0.55
-                )
+                            centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
+                            centerX, centerY + faceHeight * 0.55
+                            )
 
                 // 左肩到左耳
                 ctx.quadraticCurveTo(
-                    centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
-                    centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
-                )
+                            centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
+                            centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
+                            )
                 ctx.lineTo(centerX - faceWidth * 0.5, centerY + faceHeight * 0.1)
                 ctx.quadraticCurveTo(
-                    centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
-                    centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
-                )
+                            centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
+                            centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
+                            )
 
                 ctx.closePath()
                 ctx.fill()
@@ -99,27 +103,27 @@ Page {
                 // 右耳
                 ctx.lineTo(centerX + faceWidth * 0.55, centerY - faceHeight * 0.2)
                 ctx.quadraticCurveTo(
-                    centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
-                    centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
-                )
+                            centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
+                            centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
+                            )
 
                 // 下巴到右肩
                 ctx.lineTo(centerX + faceWidth * 0.4, centerY + faceHeight * 0.5)
                 ctx.quadraticCurveTo(
-                    centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
-                    centerX, centerY + faceHeight * 0.55
-                )
+                            centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
+                            centerX, centerY + faceHeight * 0.55
+                            )
 
                 // 左肩到左耳
                 ctx.quadraticCurveTo(
-                    centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
-                    centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
-                )
+                            centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
+                            centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
+                            )
                 ctx.lineTo(centerX - faceWidth * 0.5, centerY + faceHeight * 0.1)
                 ctx.quadraticCurveTo(
-                    centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
-                    centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
-                )
+                            centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
+                            centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
+                            )
 
                 ctx.stroke()
 
@@ -248,26 +252,13 @@ Page {
             text: "添加"
             focus: true
             onClicked: {
-                registerPreview.grabToImage(function (result) {
-                    var filePath = "C:/Users/aichao/Pictures/capture_" + Date.now() + ".png"
-                    // 最多3个
-                    if (faceListModel.count >= 3) {
-                        faceListModel.remove(0)
-                    }
-                    result.saveToFile(filePath)
-                    faceListModel.append({"url":"file:"+filePath})
-                })
+                // 该方法是异步的需要等回调
+                CameraManager.captureImage()
             }
         }
         HusButton {
             text: "注册"
             onClicked: {
-                var name = nameInput.text
-                var staffNo = staffNoInput.text
-                if(!name||!staffNo){
-                    message.error("姓名或工号不能为空")
-                    return
-                }
                 if(faceListModel.count===0){
                     message.error("人脸列表不能为空，请添加人脸")
                     return
@@ -281,24 +272,51 @@ Page {
                     }
                     paths.push(path)
                 }
-                registerFace.processImages(name,staffNo,paths)
+                registerFace.processImages(nameInput.text,staffNoInput.text,paths)
             }
         }
     }
 
     Connections {
-
+        target: CameraManager
+        function onImageCaptureSuccess(id,image){
+            // 最多3个
+            var name = nameInput.text
+            var staffNo = staffNoInput.text
+            if(!name||!staffNo){
+                message.error("姓名或工号不能为空")
+                return
+            }
+            var filePath = qmlImageUtils.createRegisterPicUrl(staffNo)
+            let cropImage = qmlImageUtils.cropImage(
+                    image,Qt.size(registerPage.width,registerPage.height))
+            if(!qmlImageUtils.saveImage(cropImage,filePath)){
+                message.error("图片保存失败，请稍后再试")
+            }
+            if (faceListModel.count >= 3) {
+                // 删除第一个文件
+                let path = faceListModel.get(0).url
+                if (path.startsWith("file:")) {
+                    path = path.substring(5)// 去掉 file:///
+                }
+                if (qmlImageUtils.removeFile(path)) {
+                    faceListModel.remove(0)
+                    console.log("文件删除成功: ", path);
+                } else {
+                    console.log("文件删除失败:", file.errorString());
+                }
+            }
+            faceListModel.append({"url":"file:" + filePath})
+            console.log("添加成功: ", filePath);
+        }
+        function onImageCaptureFailed(id,error,msg){
+            console.error("文件保存失败:", error, msg);
+        }
     }
 
     Component.onCompleted: {
         Qt.callLater(function(){
             CameraManager.videoOutput = registerPreview
-            console.log("RegisterPage created, starting camera...")
         })
     }
-
-    // Component.onDestruction: {
-    //     console.log("RegisterPage destroyed, stopping camera...")
-    //     registerCamera.stop()
-    // }
 }

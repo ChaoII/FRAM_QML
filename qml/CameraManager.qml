@@ -6,17 +6,21 @@ import QtMultimedia
 
 QtObject {
     id: cameraManager
+    signal imageCaptureSuccess(id:string, image:variant)
+    signal imageCaptureFailed(id:string, error:string, msg:string)
 
     // 摄像头属性
     property Camera camera: Camera
     {
-        id: camera
+        id: _camera
         active: true
     }
 
     property ImageCapture imageCapture: ImageCapture
     {
-        id: imageCapture
+        id: _imageCapture
+        onImageCaptured: (id, image) => imageCaptureSuccess(id, image)
+        onErrorOccurred: (id, error, msg) => imageCaptureFailed(id, error, msg)
     }
 
     readonly property bool isCameraActivated: camera.active
@@ -29,9 +33,9 @@ QtObject {
 
     property CaptureSession captureSession: CaptureSession
     {
-        id: captureSession
-        camera: camera
-        imageCapture: imageCapture
+        id: _captureSession
+        camera: _camera
+        imageCapture: _imageCapture
     }
 
     // 可用摄像头列表
@@ -69,6 +73,12 @@ QtObject {
         })
     }
 
+
+    function captureImage(){
+        imageCapture.capture()
+    }
+
+
     // 开始摄像头
     function startCamera() {
         camera.start()
@@ -94,6 +104,4 @@ QtObject {
             camera.stop()
         }
     }
-
-
 }

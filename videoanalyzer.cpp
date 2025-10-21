@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "qmlimageutils.h"
 #include "videoanalyzer.h"
 #include "core/ConfigManager.h"
 
@@ -124,33 +125,8 @@ void FrameAnalyzer::onNewFrame(const QVideoFrame& frame) {
     const QImage originalImage = frame.toImage();
     // frame.unmap();
 
-    const QSize originalSize = originalImage.size();
-    if (originalSize.isEmpty()) {
-        qWarning() << "Original image is empty";
-        return;
-    }
-
-    // 计算缩放比例（保持宽高比并填充）
-    const double scaleX = static_cast<double>(dstSize_.width()) / originalSize.width();
-    const double scaleY = static_cast<double>(dstSize_.height()) / originalSize.height();
-    const double scale = qMax(scaleX, scaleY); // PreserveAspectCrop 使用最大值
-
-    // 计算缩放后的尺寸
-    const QSize scaledSize(qRound(originalSize.width() * scale),
-                           qRound(originalSize.height() * scale));
-
-    // 计算裁剪区域（居中裁剪）
-    const QRect cropRect((scaledSize.width() - dstSize_.width()) / 2,
-                         (scaledSize.height() - dstSize_.height()) / 2,
-                         dstSize_.width(), dstSize_.height());
-
-    // 先缩放到目标尺寸，然后裁剪
-    const QImage scaledImage = originalImage.scaled(
-        scaledSize,
-        Qt::KeepAspectRatioByExpanding, // 关键：保持比例并扩展
-        Qt::SmoothTransformation);
-    // 裁剪到 320x600
-    const QImage croppedImage = scaledImage.copy(cropRect);
+    // 裁剪到 dstSize_
+    const QImage croppedImage = QmlImageUtils::cropImage(originalImage, dstSize_);
     lastFrame_ = croppedImage;
     emit frameCaptured(croppedImage);
     qDebug() << "Got frame:" << croppedImage.size();

@@ -31,7 +31,8 @@ void FaceRecognizerWorker::processFace(const QImage& image,
     cv::Mat rgb_mat;
     cv::cvtColor(mat, rgb_mat, cv::COLOR_RGBA2BGR);
     const auto aligned_images =
-        modeldeploy::vision::utils::align_face_with_five_points(modeldeploy::ImageData::from_mat(&rgb_mat), detResult);
+        modeldeploy::vision::utils::align_face_with_five_points(
+            modeldeploy::ImageData::from_mat(&rgb_mat), detResult);
     modeldeploy::vision::FaceRecognitionResult result;
     if (!face_rec_->predict(aligned_images[0], &result)) {
         qDebug() << "inference Error";
@@ -74,7 +75,7 @@ void FaceRecognizerWorker::processFace(const QImage& image,
 
     // 打印识别结果
     qDebug().noquote() << QString("[FaceRecognizerWorker] Recognized: %1 (%2) score=%3")
-                          .arg(name).arg(staffNo).arg(searchResult.second[0]);
+                              .arg(name).arg(staffNo).arg(searchResult.second[0]);
 
 
     // 封装 QVariantMap 发送到 QML
@@ -121,11 +122,11 @@ void FaceRecognizerWorker::saveAttendInfo() {
 
         if (!DBHelper::insertAttendInfo(info)) {
             qWarning() << "[FaceRecognizerWorker] Failed to insert attend info for staffNo:"
-                << QString::fromStdString(info.staffNo);
+                       << QString::fromStdString(info.staffNo);
         }
         else {
             qDebug() << "[FaceRecognizerWorker] Saved attend info for staffNo:"
-                << QString::fromStdString(info.staffNo);
+                     << QString::fromStdString(info.staffNo);
         }
     }
     attendInfos_.clear();

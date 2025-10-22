@@ -10,9 +10,6 @@ set(faiss_DIR "D:/faiss/install1/share/faiss")
 set(HuskarUI_DIR "D:/HuskarUI")
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Multimedia Concurrent)
-find_package(Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(faiss REQUIRED)
@@ -55,6 +52,14 @@ qt_add_executable(app_fram_qml
 )
 
 
+qt_add_resources(app_fram_qml "images"
+        PREFIX "/images"
+        FILES
+        images/face_mask.png
+        images/face_mask1.png
+        images/face_mask3.png
+)
+
 set_source_files_properties(qml/CameraManager.qml
         PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
@@ -71,7 +76,6 @@ qt_add_qml_module(app_fram_qml
         qml/Settings.qml
         qml/CameraManager.qml
         qml/RegisterInfos.qml
-
 )
 
 

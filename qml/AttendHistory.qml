@@ -99,7 +99,7 @@ Item {
                     title: '图片',
                     dataIndex: 'picUrl',
                     delegate: imageDelegate,
-                    width: 100
+                    width: 80
                 },
             ]
             minimumRowHeight: 50
@@ -107,123 +107,90 @@ Item {
 
         HusDrawer {
             id: searchPage
-            signal queryCkicked(string startTime,string endTime,string name)
-            title: qsTr('Basic Drawer')
+            signal queryCkicked(string startTime, string endTime, string name)
             edge:Qt.BottomEdge
-            contentDelegate:Component
-            {
-                Item{
-                    ColumnLayout{
-                        anchors.fill: parent  // 填充父Item
-                        anchors.margins: 20
-                        spacing: 10  // 可选：设置子项间距
-                        HusDateTimePicker{
-                            id:startTimerPicker
-                            Layout.fillWidth: true
-                            placeholderText: qsTr('请选择日期时间')
-                            format: qsTr('yyyy-MM-dd hh:mm:ss')
-                        }
+            titleDelegate: null
+            closeDelegate: null
+            contentDelegate:drawerContentDelegate
+        }
 
-                        HusDateTimePicker{
-                            id:endTimerPicker
-                            Layout.fillWidth: true
-                            placeholderText: qsTr('请选择日期时间')
-                            format: qsTr('yyyy-MM-dd hh:mm:ss')
+        Component
+        {
+            id:drawerContentDelegate
+            Item{
+                ColumnLayout{
+                    anchors.fill: parent  // 填充父Item
+                    anchors.margins: 20
+                    spacing: 10  // 可选：设置子项间距
+                    HusDateTimePicker{
+                        id:startTimerPicker
+                        Layout.fillWidth: true
+                        placeholderText: qsTr('请选择日期时间')
+                        format: qsTr('yyyy-MM-dd hh:mm:ss')
+                    }
 
+                    HusDateTimePicker{
+                        id:endTimerPicker
+                        Layout.fillWidth: true
+                        placeholderText: qsTr('请选择日期时间')
+                        format: qsTr('yyyy-MM-dd hh:mm:ss')
+
+                    }
+                    HusInput{
+                        id:nameInput
+                        Layout.fillWidth: true
+                        placeholderText:qsTr('请输入姓名')
+                    }
+                    RowLayout{
+                        HusButton{
+                            id:resetBtn
+                            text:qsTr('重置')
                         }
-                        HusInput{
-                            id:nameInput
-                            Layout.fillWidth: true
-                            placeholderText:qsTr('请输入姓名')
-                        }
-                        RowLayout{
-                            HusButton{
-                                id:resetBtn
-                                text:qsTr('重置')
+                        HusButton{
+                            id:queryBtn
+                            text:qsTr('查询')
+                            onClicked: {
+                                searchPage.queryCkicked(
+                                            Qt.formatDateTime(startTimerPicker.currentDateTime, "yyyy-MM-ddThh:mm:ss"),
+                                            Qt.formatDateTime(endTimerPicker.currentDateTime, "yyyy-MM-ddThh:mm:ss"),
+                                            nameInput.text
+                                            )
+                                searchPage.close()
                             }
-                            HusButton{
-                                id:queryBtn
-                                text:qsTr('查询')
-                                onClicked: {
-                                    searchPage.queryCkicked(
-                                                Qt.formatDateTime(startTimerPicker.currentDateTime, "yyyy-MM-ddThh:mm:ss"),
-                                                Qt.formatDateTime(endTimerPicker.currentDateTime, "yyyy-MM-ddThh:mm:ss"),
-                                                nameInput.text
-                                                )
-                                    searchPage.close()
-                                }
-                            }
                         }
-                        Item{
-                            Layout.fillHeight: true
-                        }
-                        Component.onCompleted: {
-                            let now = new Date();
-                            let todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                            let tomorrowStart = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
-                            startTimerPicker.setDateTime(todayStart)
-                            endTimerPicker.setDateTime(tomorrowStart)
-                        }}
+                    }
+                    Item{
+                        Layout.fillHeight: true
+                    }
+                    Component.onCompleted: {
+                        let now = new Date();
+                        let todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        let tomorrowStart = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+                        startTimerPicker.setDateTime(todayStart)
+                        endTimerPicker.setDateTime(tomorrowStart)
+                    }
                 }
             }
         }
 
-
-
         Component {
             id: imageDelegate
-
             HusImage {
                 fillMode: HusImage.PreserveAspectFit
                 source: "file:" + cellData
             }
         }
+
         Component {
             id: textDelegate
-
             HusText {
-                id: displayText
-
+                text: cellData
                 color: HusTheme.Primary.colorTextBase
                 horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
                 leftPadding: 8
                 rightPadding: 8
-                text: cellData
-                verticalAlignment: Text.AlignVCenter
-
-                TextMetrics {
-                    id: displayWidth
-
-                    font: displayText.font
-                    text: displayText.text
-                }
-                TextMetrics {
-                    id: startWidth
-
-                    font: displayText.font
-                    text: {
-                        let index = displayText.text.indexOf(filterInput);
-                        if (index !== -1)
-                            return displayText.text.substring(0, index);
-                        else
-                            return '';
-                    }
-                }
-                TextMetrics {
-                    id: filterWidth
-
-                    font: displayText.font
-                    text: filterInput
-                }
-                Rectangle {
-                    color: 'red'
-                    height: parent.height
-                    opacity: 0.1
-                    width: filterWidth.advanceWidth
-                    x: startWidth.advanceWidth + (displayText.width - displayWidth.advanceWidth) * 0.5
-                }
             }
         }
-
     }
 }

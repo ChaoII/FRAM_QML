@@ -6,18 +6,22 @@ import HuskarUI.Basic
 
 HusWindow {
     id: root
-    captionBar.visible: !ConfigManager.headlessMode
+    width: 480
     height: 720
+    maximumHeight: 720
+    minimumHeight: 720
+    maximumWidth: 480
+    minimumWidth: 480
     title: ""
     visible: true
-    width: 480
+    captionBar.visible: !ConfigManager.headlessMode
 
     StackView {
         id: stackView
         anchors.fill: parent
         initialItem: MainPage {
             stackView: stackView
-        }  // 把stackView传进去
+        }
     }
     Component.onCompleted: HusTheme.darkMode = ConfigManager.themeMode
 }

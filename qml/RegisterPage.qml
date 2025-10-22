@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 import QtMultimedia
 import MyApp
 import HuskarUI.Basic
@@ -12,12 +13,15 @@ Page {
 
     RegisterFace{
         id:registerFace
-        onRegisterReady:function(){
+        onRegisterFinished:function(){
             message.info("注册成功")
             faceListModel.clear()
+            if (stackView.depth > 1) {
+                stackView.pop()
+            }
         }
-        onRegisterError:function(){
-            message.error("注册失败, 请确保画面中包含人脸")
+        onRegisterFailed:function(errorMsg){
+            message.error("注册失败, 请确保画面中包含人脸:"+errorMsg)
             faceListModel.clear()
         }
     }
@@ -32,138 +36,38 @@ Page {
         anchors.fill:parent
         fillMode: VideoOutput.PreserveAspectCrop
     }
-    Item{
-        anchors.fill:parent
-        Canvas {
-            id: faceMask
-            anchors.fill: parent
-            z: 1
 
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.reset()
+    //人脸遮罩
+    Canvas {
+        id:mask
+        anchors.fill: parent
+        onPaint: {
+            var ctx = getContext("2d");
+            ctx.clearRect(0, 0, width, height);
 
-                // 绘制半透明黑色背景
-                ctx.fillStyle = "#80000000"
-                ctx.fillRect(0, 0, width, height)
+            // 半透明遮罩
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(0, 0, width, height);
 
-                // 设置不绘制模式（挖空人脸区域）
-                ctx.globalCompositeOperation = "destination-out"
+            // 挖出中间的椭圆形
+            var rx = 300;
+            var ry = 400;
+            var cx = (width-rx) / 2
+            // 居中往上移60像素
+            var cy = (height-ry) / 2 - 60
 
-                // 绘制人脸轮廓（包括耳朵和肩膀）
-                var centerX = width / 2
-                var centerY = height / 2
-                var faceWidth = Math.min(width, height) * 0.6
-                var faceHeight = faceWidth * 1.3
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.globalCompositeOperation = "source-over";
 
-                ctx.beginPath()
-
-                // 头顶部分（半圆）
-                ctx.arc(centerX, centerY - faceHeight * 0.35, faceWidth * 0.5, Math.PI, 0, false)
-
-                // 右耳
-                ctx.lineTo(centerX + faceWidth * 0.55, centerY - faceHeight * 0.2)
-                ctx.quadraticCurveTo(
-                            centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
-                            centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
-                            )
-
-                // 下巴到右肩
-                ctx.lineTo(centerX + faceWidth * 0.4, centerY + faceHeight * 0.5)
-                ctx.quadraticCurveTo(
-                            centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
-                            centerX, centerY + faceHeight * 0.55
-                            )
-
-                // 左肩到左耳
-                ctx.quadraticCurveTo(
-                            centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
-                            centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
-                            )
-                ctx.lineTo(centerX - faceWidth * 0.5, centerY + faceHeight * 0.1)
-                ctx.quadraticCurveTo(
-                            centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
-                            centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
-                            )
-
-                ctx.closePath()
-                ctx.fill()
-
-                // 恢复绘制模式
-                ctx.globalCompositeOperation = "source-over"
-
-                // 绘制白色边框
-                ctx.strokeStyle = "white"
-                ctx.lineWidth = 2
-                ctx.beginPath()
-
-                // 头顶部分（半圆）
-                ctx.arc(centerX, centerY - faceHeight * 0.35, faceWidth * 0.5, Math.PI, 0, false)
-
-                // 右耳
-                ctx.lineTo(centerX + faceWidth * 0.55, centerY - faceHeight * 0.2)
-                ctx.quadraticCurveTo(
-                            centerX + faceWidth * 0.6, centerY - faceHeight * 0.1,
-                            centerX + faceWidth * 0.5, centerY + faceHeight * 0.1
-                            )
-
-                // 下巴到右肩
-                ctx.lineTo(centerX + faceWidth * 0.4, centerY + faceHeight * 0.5)
-                ctx.quadraticCurveTo(
-                            centerX + faceWidth * 0.25, centerY + faceHeight * 0.6,
-                            centerX, centerY + faceHeight * 0.55
-                            )
-
-                // 左肩到左耳
-                ctx.quadraticCurveTo(
-                            centerX - faceWidth * 0.25, centerY + faceHeight * 0.6,
-                            centerX - faceWidth * 0.4, centerY + faceHeight * 0.5
-                            )
-                ctx.lineTo(centerX - faceWidth * 0.5, centerY + faceHeight * 0.1)
-                ctx.quadraticCurveTo(
-                            centerX - faceWidth * 0.6, centerY - faceHeight * 0.1,
-                            centerX - faceWidth * 0.55, centerY - faceHeight * 0.2
-                            )
-
-                ctx.stroke()
-
-                // 绘制四个角标
-                var cornerSize = 30
-                var cornerLength = 15
-
-                function drawCorner(x, y, rotation) {
-                    ctx.save()
-                    ctx.translate(x, y)
-                    ctx.rotate(rotation * Math.PI / 180)
-
-                    ctx.beginPath()
-                    ctx.moveTo(0, cornerLength)
-                    ctx.lineTo(0, 0)
-                    ctx.lineTo(cornerLength, 0)
-                    ctx.stroke()
-
-                    ctx.restore()
-                }
-
-                // 左上角
-                drawCorner(centerX - faceWidth * 0.55, centerY - faceHeight * 0.35, 0)
-                // 右上角
-                drawCorner(centerX + faceWidth * 0.55, centerY - faceHeight * 0.35, 90)
-                // 右下角
-                drawCorner(centerX + faceWidth * 0.55, centerY + faceHeight * 0.55, 180)
-                // 左下角
-                drawCorner(centerX - faceWidth * 0.55, centerY + faceHeight * 0.55, 270)
-            }
-        }
-
-        // 提示文字
-        Text {
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 50
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "请将人脸对准轮廓区域"
-            color: "white"
-            font.pixelSize: 20
+            // 画个白色边框
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+            ctx.stroke();
         }
     }
 
@@ -223,13 +127,14 @@ Page {
     }
 
     ListModel { id: faceListModel }
+
+
     HusMessage {
         id: message
-        z: 999
-        parent: root.captionBar
         width: parent.width
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.bottom
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        z:999
     }
 
     RowLayout{
@@ -239,6 +144,14 @@ Page {
         anchors.bottomMargin: 10
         Layout.alignment: Qt.AlignVCenter
         spacing: 10
+
+        HusButton {
+            text: "弹走鱼尾纹"
+            onClicked: {
+                message.error("asdasdasdasdasd")
+            }
+        }
+
         HusButton {
             text: "返回"
             onClicked: {
@@ -265,10 +178,9 @@ Page {
                 }
                 var paths = []
                 for (var i = 0; i < faceListModel.count; i++) {
-                    // 去掉 file:/// 前缀
                     var path = faceListModel.get(i).url;
                     if (path.startsWith("file:")) {
-                        path = path.substring(5)// 去掉 file:///
+                        path = path.substring(5)// 去掉 file:
                     }
                     paths.push(path)
                 }
@@ -287,10 +199,11 @@ Page {
                 message.error("姓名或工号不能为空")
                 return
             }
-            var filePath = qmlImageUtils.createRegisterPicUrl(staffNo)
+            var tempFilePath = qmlImageUtils.getTempPicUrl()
             let cropImage = qmlImageUtils.cropImage(
-                    image,Qt.size(registerPage.width,registerPage.height))
-            if(!qmlImageUtils.saveImage(cropImage,filePath)){
+                    image, Qt.size(registerPage.width,registerPage.height)
+                    )
+            if(!qmlImageUtils.saveImage(cropImage,tempFilePath)){
                 message.error("图片保存失败，请稍后再试")
             }
             if (faceListModel.count >= 3) {
@@ -306,8 +219,8 @@ Page {
                     console.log("文件删除失败:", file.errorString());
                 }
             }
-            faceListModel.append({"url":"file:" + filePath})
-            console.log("添加成功: ", filePath);
+            faceListModel.append({"url":"file:" + tempFilePath})
+            console.log("添加成功: ", tempFilePath);
         }
         function onImageCaptureFailed(id,error,msg){
             console.error("文件保存失败:", error, msg);
@@ -318,5 +231,6 @@ Page {
         Qt.callLater(function(){
             CameraManager.videoOutput = registerPreview
         })
+        console.log(stackView.depth)
     }
 }

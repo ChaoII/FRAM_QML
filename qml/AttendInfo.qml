@@ -29,6 +29,7 @@ Item {
                 Layout.preferredWidth: 120
                 Layout.preferredHeight: 150
                 previewEnabled: false
+                fillMode: HusImage.PreserveAspectFit
             }
 
             HusImage {

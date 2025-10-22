@@ -27,6 +27,8 @@ public:
     /** 删除某个向量 */
     void removeVector(int64_t id);
 
+    void removeVectors(const std::vector<int64_t>& ids);
+
     /** 更新向量（本质是删除后再添加） */
     void updateVector(int64_t id, const std::vector<float>& vec);
     /** 查询是否存在某ID */
@@ -50,6 +52,6 @@ private:
 
     faiss::Index* index_ = nullptr;
     // 用于记录哪些ID存在 本身不应该存在这个问题，因为后面会使用雪花算法生成ID，但是为了避免冲突，这里还是加上了
-    std::unordered_map<int64_t, size_t> id_to_vec_dim_;
+    std::unordered_map<int64_t, size_t> idToVecDim_;
     bool dirty_ = false;
 };

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import QtMultimedia
 import HuskarUI.Basic
 import MyApp
@@ -102,37 +103,58 @@ Item {
     }
 
 
-    Row {
-        id: controls
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 8
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 8
+    HusDrawer{
+        id: menuDrawer
+        edge:Qt.LeftEdge
+        drawerSize: parent.width/3
+        contentDelegate:drawerContentDelegate
+        title: qsTr('菜单')
+    }
+    Component {
+        id: drawerContentDelegate
+        ColumnLayout {
+            id: controls
+            anchors.fill: parent
+            spacing: 8
 
-        HusButton {
-            id: btnAttendHistory
-            text: "打卡记录"
-            onClicked: {
-                stackView.push(attendhistoryComponent)
+            HusButton {
+                id: btnAttendHistory
+                text: "打卡记录"
+                Layout.fillWidth: true
+                onClicked: {
+                    menuDrawer.close()
+                    stackView.push(attendhistoryComponent)
+                }
             }
-        }
 
-        HusButton {
-            id: btnRegisterInfo
-            text: "注册信息"
-            onClicked: {
-                stackView.push(registerInfosComponent)
+            HusButton {
+                id: btnRegisterInfo
+                text: "注册信息"
+                Layout.fillWidth: true
+                onClicked: {
+                    menuDrawer.close()
+                    stackView.push(registerInfosComponent)
+                }
             }
-        }
 
-        HusButton {
-            id: btnSettings
-            text: "设置"
-            onClicked: {
-                stackView.push(settingsComponent)
+            HusButton {
+                id: btnSettings
+                text: "设置"
+                Layout.fillWidth: true
+
+                onClicked: {
+                    menuDrawer.close()
+                    stackView.push(settingsComponent)
+                }
+            }
+            Item{
+                Layout.fillHeight: true
             }
         }
     }
+
+
+
 
     AttendInfo {
         id: attendInfo

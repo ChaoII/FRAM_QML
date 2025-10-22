@@ -9,9 +9,9 @@ RegisterFace::RegisterFace(QObject* parent): QObject(parent) {
     connect(this, &RegisterFace::registerInfoReady,
             registerWorker_, &RegisterFaceWorker::RegisterFace);
     connect(registerWorker_, &RegisterFaceWorker::registerFinished,
-            this, &RegisterFace::registerReady);
+            this, &RegisterFace::registerFinished);
     connect(registerWorker_, &RegisterFaceWorker::registerFailed,
-            this, &RegisterFace::registerError);
+            this, &RegisterFace::registerFailed);
     registerThread_->start();
 }
 

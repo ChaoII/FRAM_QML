@@ -13,12 +13,12 @@
 /** 添加向量（带ID） */
 void VectorSearch::addVector(const int64_t id, const std::vector<float>& vec) {
     if (index_ == nullptr) return;
-    if (id_to_vec_dim_.count(id)) {
+    if (idToVecDim_.count(id)) {
         std::cerr << "[VectorSearch] ID already exists, use updateVector() instead.\n";
         return;
     }
     index_->add_with_ids(1, vec.data(), &id);
-    id_to_vec_dim_[id] = vec.size();
+    idToVecDim_[id] = vec.size();
     dirty_ = true;
 }
 
@@ -34,7 +34,7 @@ void VectorSearch::addVectors(const std::vector<int64_t>& ids,
     }
     index_->add_with_ids(static_cast<int64_t>(vecs.size()), flat.data(), ids.data());
     for (auto& id : ids)
-        id_to_vec_dim_[id] = d;
+        idToVecDim_[id] = d;
     dirty_ = true;
 }
 
@@ -53,7 +53,16 @@ void VectorSearch::removeVector(const int64_t id) {
     if (index_ == nullptr) return;
     const faiss::IDSelectorRange selector(id, id + 1);
     index_->remove_ids(selector);
-    id_to_vec_dim_.erase(id);
+    idToVecDim_.erase(id);
+    dirty_ = true;
+}
+
+void VectorSearch::removeVectors(const std::vector<int64_t>& ids){
+    const faiss::IDSelectorArray selector(ids.size(),ids.data());
+    index_->remove_ids(selector);
+    for(auto& id:ids){
+        idToVecDim_.erase(id);
+    }
     dirty_ = true;
 }
 
@@ -65,7 +74,7 @@ void VectorSearch::updateVector(const int64_t id, const std::vector<float>& vec)
 
 /** 查询是否存在某ID */
 bool VectorSearch::hasVector(const int64_t id) const {
-    return id_to_vec_dim_.count(id) > 0;
+    return idToVecDim_.count(id) > 0;
 }
 
 /** 获取向量总数 */

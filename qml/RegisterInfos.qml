@@ -6,10 +6,29 @@ import Fram
 Item {
     id: registerInfo
     property var stackView: nul
+
     Component.onCompleted: {
-        // 后端会默认当前0点到第二天0点的所有人
         registerInfoDto.queryRegisterInfo();
         CameraManager.videoOutput = null
+    }
+
+    Connections{
+        target: searchPage
+        function onQueryCkicked(name){
+            if(name){
+                registerInfoDto.queryRegisterInfoByName(name);
+                return
+            }
+            registerInfoDto.queryRegisterInfo();
+        }
+    }
+    Connections {
+        target: stackView
+        function onCurrentItemChanged() {
+            if (stackView.currentItem === registerInfo) {
+                registerInfoDto.queryRegisterInfo();
+            }
+        }
     }
 
     RegisterInfoDto{
@@ -25,7 +44,15 @@ Item {
             // 显示错误信息...
             // busyIndicator.running = false;
         }
-        onIsQueryingChanged: {
+        onDeleteFinished: function(){
+            registerInfoDto.queryRegisterInfo();
+        }
+
+        onDeleteError: function(){
+            console.error("Query error:", errorInfo);
+        }
+
+        onIsBusyChanged: {
             // busyIndicator.running = attendHistoryDto.isQuerying;
         }
     }
@@ -40,7 +67,7 @@ Item {
                 iconSource: HusIcon.ReloadOutlined
                 Layout.preferredWidth: 35
                 onClicked: {
-                    registerInfoDto.queryRegisterInfo();
+                    searchPage.open()
                 }
             }
             HusIconButton {
@@ -67,10 +94,53 @@ Item {
                 iconSource: HusIcon.UserDeleteOutlined
                 Layout.preferredWidth: 35
                 onClicked: {
-                    console.log("delete staff clicked")
+                    let keys = registerInfoTable.getCheckedKeys()
+                    registerInfoTable.clearAllCheckedKeys()
+                    registerInfoDto.deleteRegisterInfos(keys);
                 }
             }
         }
+
+        HusDrawer {
+            id: searchPage
+            signal queryCkicked(name:string)
+            titleDelegate: null
+            closeDelegate: null
+            edge:Qt.BottomEdge
+            contentDelegate:Component
+            {
+                Item{
+                    ColumnLayout{
+                        anchors.fill: parent  // 填充父Item
+                        anchors.margins: 20
+                        spacing: 10  // 可选：设置子项间距
+                        HusInput{
+                            id:nameInput
+                            Layout.fillWidth: true
+                            placeholderText:qsTr('请输入姓名')
+                        }
+                        RowLayout{
+                            HusButton{
+                                id:resetBtn
+                                text:qsTr('重置')
+                            }
+                            HusButton{
+                                id:queryBtn
+                                text:qsTr('查询')
+                                onClicked: {
+                                    searchPage.queryCkicked(nameInput.text)
+                                    searchPage.close()
+                                }
+                            }
+                        }
+                        Item{
+                            Layout.fillHeight: true
+                        }
+                    }
+                }
+            }
+        }
+
 
 
         HusTableView {
@@ -98,14 +168,14 @@ Item {
                 {
                     title: '注册时间',
                     dataIndex: 'registerTime',
-                    width: 150,
+                    width: 180,
                     delegate: textDelegate
                 },
                 {
                     title: '图片',
                     dataIndex: 'picUrl',
                     delegate: imageDelegate,
-                    width: 100
+                    width: 60
                 },
             ]
             minimumRowHeight: 50
@@ -116,7 +186,6 @@ Item {
             RegisterPage{
                 stackView: registerInfo.stackView
             }
-
         }
         Component {
             id: imageDelegate
@@ -136,39 +205,7 @@ Item {
                 rightPadding: 8
                 text: cellData
                 verticalAlignment: Text.AlignVCenter
-                TextMetrics {
-                    id: displayWidth
-
-                    font: displayText.font
-                    text: displayText.text
-                }
-                TextMetrics {
-                    id: startWidth
-
-                    font: displayText.font
-                    text: {
-                        let index = displayText.text.indexOf(filterInput);
-                        if (index !== -1)
-                            return displayText.text.substring(0, index);
-                        else
-                            return '';
-                    }
-                }
-                TextMetrics {
-                    id: filterWidth
-
-                    font: displayText.font
-                    text: filterInput
-                }
-                Rectangle {
-                    color: 'red'
-                    height: parent.height
-                    opacity: 0.1
-                    width: filterWidth.advanceWidth
-                    x: startWidth.advanceWidth + (displayText.width - displayWidth.advanceWidth) * 0.5
-                }
             }
         }
-
     }
 }

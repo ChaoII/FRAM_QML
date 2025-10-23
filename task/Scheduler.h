@@ -8,9 +8,9 @@
 #include <functional>
 
 
-
 class Scheduler : public QObject {
     Q_OBJECT
+
 public:
     Scheduler(std::function<bool()> taskFunc, qint64 intervalMs, QObject* parent = nullptr);
 
@@ -19,8 +19,8 @@ public:
     void start();
     void stop();
 
-    private slots:
-        void runTask();
+private slots:
+    void runTask();
 
 private:
     QTimer* timer_;
@@ -29,4 +29,3 @@ private:
     qint64 intervalMs_;
     bool running_ = false;
 };
-
